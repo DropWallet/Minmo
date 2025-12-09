@@ -635,8 +635,8 @@ export function ReviewScreen({
               // If entry is already saved (auto-saved or editing), close with latest data
               if (currentEntryId) {
                 try {
-                  // Update photo if it was added
-                  if (photoUri && !existingEntry?.photo_local_uri) {
+                  // Update photo if it changed (added, removed, or replaced)
+                  if (photoUri !== existingEntry?.photo_local_uri) {
                     await handleSave();
                   }
                   const latestEntry = await getEntry(currentEntryId);
