@@ -6,7 +6,7 @@ interface IconProps {
   name: string;
   size?: number;
   color?: string; // Can be a theme color key (e.g., 'textPrimary', 'accent') or a hex color
-  style?: any;
+  style?: React.ComponentProps<typeof Svg>['style'];
 }
 
 // Convert paths to functions that accept color

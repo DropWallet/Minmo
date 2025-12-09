@@ -150,7 +150,7 @@ export function TodayEntryCard({ entry, onEdit, onDelete }: TodayEntryCardProps)
       {/* Bottom: Today's Moment */}
       <View className="flex-row items-center justify-center pt-4 border-t border-border-subtle dark:border-border-subtle-dark">
         <Text className="text-text-muted dark:text-text-muted-dark text-sm mr-2">✓</Text>
-        <Text className="text-text-primary dark:text-text-primary-dark text-sm font-medium">Today's moment</Text>
+        <Text className="text-text-primary dark:text-text-primary-dark text-sm font-medium">Today&apos;s moment</Text>
       </View>
     </View>
   );

@@ -15,7 +15,6 @@ import { useTheme } from '@hooks/useTheme';
 import { DB_DELAYS, IOS_DELAYS, ANIMATION } from '@utils/constants';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import Gradient from '@components/Gradient';
-import { ShadowBox } from '@components/ShadowBox';
 import * as Haptics from 'expo-haptics';
 import { ButtonPrimary } from '@/components/ButtonPrimary';
 
@@ -25,7 +24,7 @@ export default function RecordScreen() {
   const [showReview, setShowReview] = useState(false);
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [dailyPrompt, setDailyPrompt] = useState<string>('');
   const [recordingDuration, setRecordingDuration] = useState(0);
