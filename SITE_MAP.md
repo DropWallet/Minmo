@@ -1,0 +1,12 @@
+# Sitemap
+- Record (default landing)
+  - Daily prompt + Record button + fake waveform while recording
+  - Recording → Review → Done
+  - Review: playback, duration, add photo (camera or library), save
+- Timeline
+  - List (reverse chronological), search (FTS), favourites filter
+  - Entry Detail: playback, prompt, transcript, favourite, photo
+- Settings
+  - Transcription toggle (default ON; privacy copy)
+  - Account (placeholder; auth deferred)
+  - Data: export (future), clear local, about/legal

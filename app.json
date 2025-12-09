@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "MinMo",
+    "slug": "minmo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.minmo.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "MinMo needs access to your microphone to record voice notes.",
+        "NSCameraUsageDescription": "MinMo needs access to your camera to add photos to your moments.",
+        "NSPhotoLibraryUsageDescription": "MinMo needs access to your photo library to add photos to your moments."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "package": "com.minmo.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow MinMo to access your microphone to record voice notes."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MinMo to access your camera to add photos to your moments."
+        }
+      ],
+      "expo-font"
+    ]
+  }
+}
