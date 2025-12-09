@@ -1,4 +1,8 @@
 // Semantic tokens layer - references tailwind.config.js (source of truth)
+// NOTE: Using require() instead of import because tailwind.config.js uses CommonJS (module.exports).
+// Converting to ES modules would require refactoring the config file structure and may break
+// Tailwind's configuration loading. This is acceptable technical debt - the disable comments
+// are scoped to these specific lines and documented here for future refactoring.
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const semanticTheme = require('./tailwind.config.js').semanticTheme;
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Text, Animated, StyleSheet } from 'react-native';
 import { useTheme } from '@hooks/useTheme';
+// NOTE: Using require() instead of import because tailwind.config.js uses CommonJS (module.exports).
+// This matches the pattern used in themeconfig.ts. See that file for full rationale.
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const tailwindColors = require('../../tailwind.config.js').tailwindColors;
 
