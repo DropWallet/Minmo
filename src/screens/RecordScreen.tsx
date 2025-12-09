@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Alert, ScrollView, Platform, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Alert, ScrollView, Platform, Image, Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { ReviewScreen } from './ReviewScreen';
 import { ButtonSecondary } from '@components/ButtonSecondary';
@@ -14,7 +15,6 @@ import { useTheme } from '@hooks/useTheme';
 import { DB_DELAYS, IOS_DELAYS, ANIMATION } from '@utils/constants';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import Gradient from '@components/Gradient';
-import { ShadowBox } from '@components/ShadowBox';
 import * as Haptics from 'expo-haptics';
 import { ButtonPrimary } from '@/components/ButtonPrimary';
 
@@ -24,7 +24,8 @@ export default function RecordScreen() {
   const [showReview, setShowReview] = useState(false);
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [dailyPrompt, setDailyPrompt] = useState<string>('');
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [todaysEntry, setTodaysEntry] = useState<Entry | null>(null);
@@ -38,10 +39,24 @@ export default function RecordScreen() {
   const captionScrollViewRef = useRef<ScrollView | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const waveformIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRender = useRef(true);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const waveformAnims = useRef(
     Array.from({ length: 30 }, () => new Animated.Value(Math.random() * 50 + 10))
   ).current;
+
+  // Screen dimensions for full-screen animation
+  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get('window').height;
+
+  // Animation values for card expansion
+  const cardScaleAnim = useRef(new Animated.Value(1)).current; // 1 = normal, 0 = full screen
+  const borderRadiusAnim = useRef(new Animated.Value(1)).current; // 1 = rounded-xl (12px), 0 = no radius
+  const promptOpacityAnim = useRef(new Animated.Value(1)).current; // 1 = visible, 0 = hidden
+  const paddingAnim = useRef(new Animated.Value(1)).current; // 1 = normal padding, 0 = no padding
+
+  // Animation constants
+  const ANIMATION_DURATION = 300;
 
   const formatDurationShort = (seconds: number): string => {
     const secs = Math.floor(seconds);
@@ -67,6 +82,20 @@ export default function RecordScreen() {
       loadTodaysEntry();
     }, [])
   );
+
+  // Clear sound when todaysEntry changes (new recording saved)
+  useEffect(() => {
+    if (sound) {
+      // Unload old sound when entry changes
+      sound.unloadAsync().catch(() => {
+        // Silently handle unload errors
+      });
+      setSound(null);
+      setIsPlaying(false);
+      setCurrentWordIndex(-1);
+      setWords([]);
+    }
+  }, [todaysEntry?.audio_local_uri]); // Only trigger when audio URI changes
 
   useEffect(() => {
     if (isRecording) {
@@ -351,6 +380,65 @@ export default function RecordScreen() {
     }
   }, [currentWordIndex, isPlaying]);
 
+  // Animate card expansion when playing
+  useEffect(() => {
+    // Skip animation on initial mount
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
+    if (isPlaying) {
+      // Expand to full screen
+      Animated.parallel([
+        Animated.timing(cardScaleAnim, {
+          toValue: 0,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderRadiusAnim, {
+          toValue: 0,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: false,
+        }),
+        Animated.timing(promptOpacityAnim, {
+          toValue: 0,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: true,
+        }),
+        Animated.timing(paddingAnim, {
+          toValue: 0,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    } else {
+      // Contract back to normal
+      Animated.parallel([
+        Animated.timing(cardScaleAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderRadiusAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: false,
+        }),
+        Animated.timing(promptOpacityAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: true,
+        }),
+        Animated.timing(paddingAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATION,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  }, [isPlaying]);
+
   // Animate word highlighting
   useEffect(() => {
     if (currentWordIndex >= 0 && currentWordIndex < words.length) {
@@ -374,41 +462,38 @@ export default function RecordScreen() {
     }
   }, [currentWordIndex, words.length]);
 
+  // Calculate caption height based on available space
+  const calculateCaptionHeight = () => {
+    if (!isPlaying) return 120;
+    const bottomSectionPadding = 16 + 32; // pt-4 (16px) + pb-8 (32px)
+    const buttonsRowHeight = 48; // Medium button height
+    const sectionGap = 16; // gap-4
+    const imageHeight = todaysEntry?.photo_local_uri ? screenWidth : 0; // Square image or none
+    const tabBarHeight = 49 + insets.bottom; // Tab bar (49px) + safe area bottom
+    const extraPaddingAdjustment = !todaysEntry?.photo_local_uri && isPlaying ? 16 : 0; // Subtract 16px when no photo and playing
+    const availableHeight = screenHeight - imageHeight - bottomSectionPadding - buttonsRowHeight - sectionGap - tabBarHeight - extraPaddingAdjustment;
+    return Math.max(120, availableHeight - 20); // -20 for some buffer
+  };
+
   const playSound = async () => {
-    console.log('[playSound] Called');
-    console.log('[playSound] todaysEntry?.audio_local_uri:', todaysEntry?.audio_local_uri);
-    console.log('[playSound] sound exists:', !!sound);
-    console.log('[playSound] isPlaying:', isPlaying);
-    
     if (!todaysEntry?.audio_local_uri) {
-      console.log('[playSound] No audio URI, returning');
       return;
     }
 
     try {
       if (sound) {
-        console.log('[playSound] Sound exists, checking status');
         try {
           const status = await sound.getStatusAsync();
-          console.log('[playSound] Current sound status:', {
-            isLoaded: status.isLoaded,
-            isPlaying: status.isLoaded ? status.isPlaying : 'N/A',
-            didJustFinish: status.isLoaded ? status.didJustFinish : 'N/A',
-            positionMillis: status.isLoaded ? status.positionMillis : 'N/A',
-            durationMillis: status.isLoaded ? status.durationMillis : 'N/A',
-          });
           
           // Use actual status.isPlaying instead of state variable (they might be out of sync)
           const actuallyPlaying = status.isLoaded && status.isPlaying;
           
           if (actuallyPlaying || isPlaying) {
-            console.log('[playSound] Pausing audio');
             try {
               await sound.pauseAsync();
               setIsPlaying(false);
               setCurrentWordIndex(-1);
             } catch (pauseError) {
-              console.log('[playSound] Error pausing, sound may be invalid:', pauseError);
               // If pause fails, sound is likely invalid - recreate it
               setSound(null);
               setIsPlaying(false);
@@ -416,7 +501,6 @@ export default function RecordScreen() {
               // Fall through to create new sound
             }
           } else {
-            console.log('[playSound] Resuming/restarting audio');
             try {
               if (status.isLoaded) {
                 // Reset position if at the end (positionMillis >= durationMillis)
@@ -424,19 +508,16 @@ export default function RecordScreen() {
                 if (status.positionMillis !== undefined && 
                     status.durationMillis !== undefined &&
                     status.positionMillis >= status.durationMillis) {
-                  console.log('[playSound] Audio at end, resetting position to 0');
                   await sound.setPositionAsync(0);
                 }
               }
               await sound.playAsync();
-              console.log('[playSound] playAsync called, setting isPlaying to true');
               setIsPlaying(true);
               
               // Re-set the status update callback for existing sound
               sound.setOnPlaybackStatusUpdate((status) => {
                 if (status.isLoaded) {
                   if (status.didJustFinish) {
-                    console.log('[playbackStatus] Audio finished');
                     setIsPlaying(false);
                     setCurrentWordIndex(-1);
                   } else if (status.positionMillis !== undefined) {
@@ -460,7 +541,6 @@ export default function RecordScreen() {
                 }
               });
             } catch (playError) {
-              console.log('[playSound] Error playing, sound may be invalid:', playError);
               // If play fails, sound is likely invalid - recreate it
               setSound(null);
               setIsPlaying(false);
@@ -469,7 +549,6 @@ export default function RecordScreen() {
             }
           }
         } catch (statusError) {
-          console.log('[playSound] Error getting status, sound may be invalid:', statusError);
           // Sound is invalid, clear it and create a new one
           setSound(null);
           setIsPlaying(false);
@@ -480,18 +559,15 @@ export default function RecordScreen() {
       
       // If sound is null (either didn't exist or was invalidated), create new one
       if (!sound) {
-        console.log('[playSound] Creating new sound object');
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: todaysEntry.audio_local_uri },
           { shouldPlay: true }
         );
-        console.log('[playSound] New sound created');
         setSound(newSound);
         setIsPlaying(true);
         newSound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded) {
             if (status.didJustFinish) {
-              console.log('[playbackStatus] Audio finished');
               setIsPlaying(false);
               setCurrentWordIndex(-1);
             } else if (status.positionMillis !== undefined) {
@@ -516,7 +592,6 @@ export default function RecordScreen() {
             }
           }
         });
-        console.log('[playSound] Status update callback set');
       }
     } catch (error) {
       console.error('[playSound] Error playing sound:', error);
@@ -551,17 +626,56 @@ export default function RecordScreen() {
     const formattedDate = formatDateWithOrdinal(entryDate);
     
     return (
-      <View className="flex-1 flex-col justify-center bg-surface-strong dark:bg-surface-strong-dark px-6">
-        <ScrollView 
-          className="flex-1" 
-          contentContainerStyle={{ 
-            flexGrow: 1,
-            justifyContent: 'center',
-            paddingTop: 64,
-            paddingBottom: 64,
+      <Animated.View 
+        className="flex-1 flex-col justify-center bg-surface-strong dark:bg-surface-strong-dark"
+        style={{
+          paddingHorizontal: paddingAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 24], // 0 = no padding, 1 = px-6 (24px)
+          }),
+        }}
+      >
+        <Animated.View
+          style={{
+            flex: 1,
+            paddingTop: paddingAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 64],
+            }),
+            paddingBottom: paddingAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 64],
+            }),
           }}
         >
-          <View className="flex-col bg-surface border border-border-default dark:border-border-default-dark dark:bg-surface-dark items-start w-full overflow-hidden rounded-xl">
+          <ScrollView 
+            className="flex-1" 
+            contentContainerStyle={{ 
+              flexGrow: 1,
+              justifyContent: 'center',
+            }}
+          >
+          <Animated.View 
+            className="flex-col bg-surface dark:bg-surface-dark items-start overflow-hidden"
+            style={{
+              width: cardScaleAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [screenWidth, screenWidth - 48], // Full width when playing, normal when not
+              }),
+              marginHorizontal: cardScaleAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0], // Negative margin to expand beyond padding when playing
+              }),
+              // Add height for full-screen expansion
+              ...(isPlaying ? {
+                height: screenHeight,
+              } : {}),
+              borderRadius: borderRadiusAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 12],
+              }),
+            }}
+          >
               {/* Image Section - Only show if photo exists */}
               {todaysEntry.photo_local_uri && (
                 <View className="w-full" style={{ aspectRatio: 1 }}>
@@ -574,9 +688,28 @@ export default function RecordScreen() {
               )}
 
               {/* Bottom Section */}
-              <View className="flex-col items-start self-stretch gap-4 px-4 pt-4 pb-8">
+              <View 
+                className="flex-col items-start self-stretch gap-4 px-4 pb-8"
+                style={{
+                  paddingTop: !todaysEntry.photo_local_uri && isPlaying ? 64 : 16, // pt-16 (64px) when no photo and playing, pt-4 (16px) otherwise
+                }}
+              >
               {/* Date and Duration Row */}
-              <View className="flex-row items-center gap-2">
+              <Animated.View 
+  className="flex-row items-center gap-2"
+  style={{
+    opacity: promptOpacityAnim,
+    transform: [
+      {
+        scaleY: promptOpacityAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 1], // 0 = collapsed, 1 = normal
+        }),
+      },
+    ],
+    overflow: 'hidden',
+  }}
+>
                 <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
                   {formattedDate}
                 </Text>
@@ -584,17 +717,34 @@ export default function RecordScreen() {
                 <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
                   {formatDurationShort(todaysEntry.duration_seconds || 0)}
                 </Text>
-              </View>
+              </Animated.View>
 
               {/* Buttons Row */}
-              <View className="flex-row justify-between items-start self-stretch">
+              <Animated.View 
+                className="flex-row justify-between items-start self-stretch"
+                style={{
+                  transform: [
+                    {
+                      translateY: promptOpacityAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-24, 0], // Move up 24px when playing, 0 = normal
+                      }),
+                    },
+                  ],
+                }}
+              >
                 <ButtonPrimary 
                   onPress={playSound} 
-                  title="Listen" 
-                  iconLeft="ic-play.svg"
+                  title={isPlaying ? "Pause" : "Listen"}
+                  iconLeft={isPlaying ? "ic-pause.svg" : "ic-play.svg"}
                   size="medium"
                 />
-                <View className="flex-row gap-4">
+                <Animated.View 
+                  className="flex-row gap-4"
+                  style={{
+                    opacity: promptOpacityAnim,
+                  }}
+                >
                   <ButtonIcon
                     onPress={handleEdit}
                     icon="ic-edit.svg"
@@ -605,28 +755,55 @@ export default function RecordScreen() {
                     icon="ic-delete.svg"
                     size="medium"
                   />
-                </View>
-              </View>
+                </Animated.View>
+              </Animated.View>
 
               {/* Prompt and Transcript Section */}
               <View className="flex-col items-start self-stretch gap-3">
-                {!isPlaying && todaysEntry.prompt && (
-                  <Text className="font-bold text-center text-text-brand dark:text-text-brand-dark">
-                    {todaysEntry.prompt}
-                  </Text>
+                {todaysEntry.prompt && (
+                  <Animated.View
+                    style={{
+                      opacity: promptOpacityAnim,
+                      transform: [
+                        {
+                          scaleY: promptOpacityAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 1], // 0 = collapsed, 1 = normal
+                          }),
+                        },
+                      ],
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Text className="font-bold text-center text-text-brand dark:text-text-brand-dark">
+                      {todaysEntry.prompt}
+                    </Text>
+                  </Animated.View>
                 )}
+                <Animated.View
+                  style={{
+                    transform: [
+                      {
+                        translateY: promptOpacityAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [-40, 0], // Move up 40px when playing, 0 = normal (adjust based on prompt height)
+                        }),
+                      },
+                    ],
+                  }}
+                >
                 {isPlaying && words.length > 0 ? (
                   // Caption animation when playing
                   <ScrollView
                     ref={captionScrollViewRef}
                     className="w-full"
                     style={{ 
-                      minHeight: 120,
-                      maxHeight: 120,
+                      minHeight: calculateCaptionHeight(),
+                      maxHeight: calculateCaptionHeight(),
                     }}
                     showsVerticalScrollIndicator={false}
                   >
-                    <View className="flex-row flex-wrap items-start justify-start" style={{ gap: 8 }}>
+                    <View className="flex-row flex-wrap items-start justify-start">
                       {words.map((word, index) => {
                         const isHighlighted = index === currentWordIndex;
                         const animValue = wordAnimations.current[index] || new Animated.Value(1);
@@ -670,11 +847,13 @@ export default function RecordScreen() {
                     </Text>
                   )
                 )}
+                </Animated.View>
               </View>
             </View>
-          </View>
+          </Animated.View>
         </ScrollView>
-      </View>
+      </Animated.View>
+    </Animated.View>
     );
   }
 

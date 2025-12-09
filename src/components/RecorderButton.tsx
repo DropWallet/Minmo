@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Text, Animated, StyleSheet } from 'react-native';
 import { useTheme } from '@hooks/useTheme';
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const tailwindColors = require('../../tailwind.config.js').tailwindColors;
 
 interface RecorderButtonProps {

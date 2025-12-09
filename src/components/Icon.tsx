@@ -6,7 +6,7 @@ interface IconProps {
   name: string;
   size?: number;
   color?: string; // Can be a theme color key (e.g., 'textPrimary', 'accent') or a hex color
-  style?: any;
+  style?: React.ComponentProps<typeof Svg>['style'];
 }
 
 // Convert paths to functions that accept color
@@ -49,6 +49,15 @@ const iconPaths: Record<string, { viewBox: string; paths: (color: string) => Rea
       />
     ),
   },
+  'ic-pause': {
+  viewBox: '0 0 20 20',
+  paths: (color) => (
+    <Path
+      d="M10 0C4.477 0 0 4.477 0 10C0 15.523 4.477 20 10 20C15.523 20 20 15.523 20 10C20 4.477 15.523 0 10 0ZM9 14H7V6H9V14ZM13 14H11V6H13V14Z"
+      fill={color}
+    />
+  ),
+},
   'ic-tick': {
     viewBox: '0 0 20 20',
     paths: (color) => (

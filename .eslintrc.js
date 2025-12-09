@@ -1,5 +1,6 @@
 module.exports = {
   root: true,
+  ignorePatterns: ['supabase/functions/**'],
   extends: [
     'expo',
     'plugin:@typescript-eslint/recommended',
@@ -17,6 +18,15 @@ module.exports = {
   settings: {
     react: {
       version: 'detect',
+    },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
     },
   },
 };

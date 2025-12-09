@@ -156,7 +156,7 @@ export default function SettingsScreen() {
                 Transcription
               </Text>
               <Text className="text-text-muted dark:text-text-muted-dark text-sm mt-1">
-                Audio is uploaded to MinMo's server for transcription. You can turn this off anytime.
+                Audio is uploaded to MinMo&apos;s server for transcription. You can turn this off anytime.
               </Text>
             </View>
             <Switch
@@ -302,7 +302,7 @@ export default function SettingsScreen() {
           <TouchableOpacity
             onPress={() => {
               try {
-                // @ts-ignore - navigation type doesn't include nested stack screens
+                // @ts-expect-error - navigation type doesn't include nested stack screens
                 navigation.navigate('Sandbox');
               } catch (error) {
                 console.error('Navigation error:', error);
@@ -319,7 +319,7 @@ export default function SettingsScreen() {
           <TouchableOpacity
             onPress={() => {
               try {
-                // @ts-ignore - navigation type doesn't include nested stack screens
+                // @ts-expect-error - navigation type doesn't include nested stack screens
                 navigation.navigate('Sandbox2');
               } catch (error) {
                 console.error('Navigation error:', error);
