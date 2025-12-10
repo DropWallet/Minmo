@@ -124,6 +124,7 @@ export const shadows: {
   metalInner: string;
   buttonPrimary: string;
   cardLarge: string;
+  cardSmall: string;
   shadowColor?: string;
 } = {
   soft: '0 6 24 -8 rgba(0,0,0,0.35)',
@@ -132,6 +133,7 @@ export const shadows: {
   metalInner: 'inset -1px -2px rgba(255, 255, 255, 0.44)',
   buttonPrimary: '2px 8px 24px -2pxrgba(53, 83, 14, 0.16), 0 2px 1px 0rgba(53, 83, 14, 0.40), 0 4px 10px -4pxrgba(53, 83, 14, 0.12), -2px -2px 4px -2px #FFF',
   cardLarge: '0 109px 31px 0 rgba(38, 70, 6, 0.00), 0 70px 28px 0 rgba(38, 70, 6, 0.01), 0 39px 24px 0 rgba(38, 70, 6, 0.04), 0 17px 17px 0 rgba(38, 70, 6, 0.07), 0 4px 10px 0 rgba(38, 70, 6, 0.08)',
+  cardSmall: '0 29px 8px 0 rgba(0, 0, 0, 0.00), 0 19px 8px 0 rgba(0, 0, 0, 0.01), 0 11px 6px 0 rgba(0, 0, 0, 0.05), 0 5px 5px 0 rgba(0, 0, 0, 0.09), 0 1px 3px 0 rgba(0, 0, 0, 0.10)',
 };
 
 // ============================================================================
@@ -393,6 +395,7 @@ export function getShadows(isDark: boolean = false) {
       metalInner: 'inset -1px -2px 0 rgba(255, 255, 255, 0.26)',
       buttonPrimary: '2px 3px 12px -2px #35530E, 0 3px 1px 0 #35530E, 0 4px 10px -4px #35530E, -2px -2px 4px -2px rgba(255, 255, 255, 0.1)',
       cardLarge: '0 109px 31px 0 rgba(38, 70, 6, 0.00), 0 70px 28px 0 rgba(38, 70, 6, 0.01), 0 39px 24px 0 rgba(38, 70, 6, 0.04), 0 17px 17px 0 rgba(38, 70, 6, 0.07), 0 4px 10px 0 rgba(38, 70, 6, 0.08)',
+      cardSmall: '0 29px 8px 0 rgba(0, 0, 0, 0.00), 0 19px 8px 0 rgba(0, 0, 0, 0.01), 0 11px 6px 0 rgba(0, 0, 0, 0.05), 0 5px 5px 0 rgba(0, 0, 0, 0.09), 0 1px 3px 0 rgba(0, 0, 0, 0.10)',
       shadowColor: shadows.shadowColor,
     };
   }

@@ -920,7 +920,7 @@ export default function RecordScreen() {
           <Text className="text-sm text-text-muted dark:text-text-muted-dark font-semibold">
             {formatDateWithOrdinal(new Date())}
           </Text>
-          <Text className="text-4xl text-text-primary dark:text-text-primary-dark font-serif-semibold text-center pt-5 mb-6">
+          <Text className="text-4xl text-text-primary dark:text-text-primary-dark font-serif-semibold text-center pt-3 mb-8">
             {dailyPrompt || 'Loading...'}
           </Text>
 

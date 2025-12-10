@@ -1,9 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Image, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
 import { getEntries, searchEntries, getFavouriteEntries } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
+import { ShadowBox } from '@components/ShadowBox';
+import { ButtonPrimary } from '@components/ButtonPrimary';
+import { formatDateWithOrdinal } from '@utils/dateFormat';
 import EntryDetailScreen from './EntryDetailScreen';
 
 type ViewMode = 'list' | 'grid' | 'card';
@@ -18,6 +22,8 @@ export default function TimelineScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showFavouritesOnly, setShowFavouritesOnly] = useState(false);
+  const [playingEntryId, setPlayingEntryId] = useState<string | null>(null);
+  const [sounds, setSounds] = useState<{ [key: string]: Audio.Sound }>({});
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const searchQueryRef = useRef<string>(''); // Store current query to avoid closure issues
   const showFavouritesOnlyRef = useRef(false); // Store current filter state to avoid closure issues
@@ -141,35 +147,119 @@ export default function TimelineScreen() {
     setShowFavouritesOnly(!showFavouritesOnly);
   };
 
-  const renderEntry = ({ item }: { item: Entry }) => (
-    <TouchableOpacity
-      className="bg-surface-strong dark:bg-surface-strong-dark rounded-lg p-4 mb-3 border border-border-subtle dark:border-border-subtle-dark"
-      onPress={() => handleEntryPress(item.id)}
-    >
-      <View className="flex-row items-center">
-        <View className="flex-1">
-          <Text className="text-text-primary dark:text-text-primary-dark text-base font-medium">
-            {item.prompt || 'Untitled Moment'}
-          </Text>
-          <Text className="text-text-muted dark:text-text-muted-dark text-sm">
-            {new Date(item.created_at).toLocaleDateString()}
-          </Text>
-          {item.duration_seconds && (
-            <Text className="text-text-muted dark:text-text-muted-dark text-xs">
-              {Math.round(item.duration_seconds)}s
-            </Text>
-          )}
+  const playEntry = async (entry: Entry) => {
+
+    try {
+      if (!entry.audio_local_uri) return;
+
+      const isCurrentlyPlaying = playingEntryId === entry.id;
+      
+      // If this entry is playing, pause it
+      if (isCurrentlyPlaying && sounds[entry.id]) {
+        await sounds[entry.id].pauseAsync();
+        setPlayingEntryId(null);
+        return;
+      }
+
+      // Stop any currently playing entry
+      if (playingEntryId && sounds[playingEntryId]) {
+        await sounds[playingEntryId].pauseAsync();
+        await sounds[playingEntryId].setPositionAsync(0);
+      }
+
+      // If sound exists for this entry, play it
+      if (sounds[entry.id]) {
+        await sounds[entry.id].playAsync();
+        setPlayingEntryId(entry.id);
+        sounds[entry.id].setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setPlayingEntryId(null);
+          }
+        });
+      } else {
+        // Create new sound
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: entry.audio_local_uri },
+          { shouldPlay: true }
+        );
+        setSounds(prev => ({ ...prev, [entry.id]: sound }));
+        setPlayingEntryId(entry.id);
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setPlayingEntryId(null);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error playing entry:', error);
+    }
+  };
+
+  // Cleanup sounds on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(sounds).forEach(sound => {
+        sound.unloadAsync().catch(() => {});
+      });
+    };
+  }, []);
+
+  const renderEntry = ({ item }: { item: Entry }) => {
+    const entryDate = new Date(item.created_at);
+    const formattedDate = formatDateWithOrdinal(entryDate);
+    const durationText = item.duration_seconds ? `${Math.round(item.duration_seconds)}s` : '';
+    const isPlaying = playingEntryId === item.id;
+    
+    return (
+      <TouchableOpacity
+        onPress={() => handleEntryPress(item.id)}
+        activeOpacity={0.9}
+        className="mb-4"
+      >
+        <View className="bg-surface dark:bg-surface-dark rounded-2xl p-1.5">
+          <View className="flex-col gap-0.5">
+            {/* Top: Image and Text Row */}
+            <View className="flex-row items-start self-stretch">
+              {item.photo_local_uri ? (
+                <ShadowBox shadowSize="cardSmall" className="w-[74px] h-[74px] rounded-lg overflow-hidden">
+                  <Image
+                    source={{ uri: item.photo_local_uri }}
+                    className="w-full h-full"
+                    style={{ resizeMode: 'cover' }}
+                  />
+                </ShadowBox>
+              ) : null}
+              <View className="flex-col items-start gap-0.5 flex-1 pt-3">
+                <Text className="text-xs font-semibold text-text-muted dark:text-text-muted-dark pl-2">
+                  {formattedDate}
+                </Text>
+                <Text className="text-2xl font-serif-semibold tracking-tighter leading-tight text-text-primary dark:text-text-primary-dark self-stretch pl-2">
+                  {item.prompt || 'Untitled Moment'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Bottom: Button and Duration Row */}
+            <View className="flex-row items-center justify-start gap-2.5 px-2 py-2 self-stretch">
+              <ButtonPrimary
+                onPress={() => {
+                  playEntry(item);
+                }}
+                title={isPlaying ? "Pause" : "Listen"}
+                iconLeft={isPlaying ? "ic-pause.svg" : "ic-play.svg"}
+                size="small"
+              />
+              {durationText && (
+                <Text className="flex-1 text-sm font-semibold text-right text-text-muted dark:text-text-muted-dark">
+                  {durationText}
+                </Text>
+              )}
+            </View>
+          </View>
         </View>
-        {item.photo_local_uri && (
-          <Image
-            source={{ uri: item.photo_local_uri }}
-            style={styles.thumbnail}
-            resizeMode="cover"
-          />
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const renderGridView = () => (
     <View className="flex-1 items-center justify-center px-4">
@@ -196,12 +286,11 @@ export default function TimelineScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface dark:bg-surface-dark">
-      <View className="px-4 py-6 border-b border-border-subtle dark:border-border-subtle-dark">
-        <Text className="text-text-primary dark:text-text-primary-dark text-2xl font-semibold mb-4">Timeline</Text>
+    <View className="flex-1 bg-surface-strong dark:bg-surface-strong-dark pt-16">
+      <View className="px-4 py-1">
         
         {/* Search Input */}
-        <View className="flex-row items-center bg-surface-strong dark:bg-surface-strong-dark rounded-lg border border-border-subtle dark:border-border-subtle-dark px-3 py-2 mb-4">
+        <View className="flex-row items-center bg-surface dark:bg-surface-dark rounded-full border border-border-subtle dark:border-border-subtle-dark px-3 py-3 mb-4">
           <Text className="text-text-muted dark:text-text-muted-dark mr-2">🔍</Text>
           <TextInput
             value={searchQuery}
@@ -227,66 +316,66 @@ export default function TimelineScreen() {
           <View className="flex-row gap-2">
             <TouchableOpacity
               onPress={() => handleViewModeChange('grid')}
-              className={`px-4 py-2 rounded-lg border ${
+              className={`px-4 py-2 rounded-full ${
                 viewMode === 'grid'
-                  ? 'bg-accent border-accent'
-                  : 'bg-surface-strong dark:bg-surface-strong-dark border-border-subtle dark:border-border-subtle-dark'
+                  ? 'bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface dark:bg-surface-dark'
               }`}
             >
               <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'grid' ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>⊞</Text>
+                <Text className={`mr-2 ${viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>⊞</Text>
                 <Text className={`${
-                  viewMode === 'grid' ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'
+                  viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
                 } text-sm font-medium`}>Grid</Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleViewModeChange('list')}
-              className={`px-4 py-2 rounded-lg border ${
+              className={`px-4 py-2 rounded-full ${
                 viewMode === 'list'
-                  ? 'bg-accent border-accent'
-                  : 'bg-surface-strong dark:bg-surface-strong-dark border-border-subtle dark:border-border-subtle-dark'
+                  ? 'bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface dark:bg-surface-dark'
               }`}
             >
               <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'list' ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>☰</Text>
+                <Text className={`mr-2 ${viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>☰</Text>
                 <Text className={`${
-                  viewMode === 'list' ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'
+                  viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
                 } text-sm font-medium`}>List</Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleViewModeChange('card')}
-              className={`px-4 py-2 rounded-lg border ${
+              className={`px-4 py-2 rounded-full ${
                 viewMode === 'card'
-                  ? 'bg-accent border-accent'
-                  : 'bg-surface-strong dark:bg-surface-strong-dark border-border-subtle dark:border-border-subtle-dark'
+                  ? 'bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface dark:bg-surface-dark'
               }`}
             >
               <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'card' ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>▦</Text>
+                <Text className={`mr-2 ${viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>▦</Text>
                 <Text className={`${
-                  viewMode === 'card' ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'
+                  viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
                 } text-sm font-medium`}>Card</Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleFavouritesToggle}
-              className={`px-4 py-2 rounded-lg border ${
+              className={`px-4 py-2 rounded-full ${
                 showFavouritesOnly
-                  ? 'bg-accent border-accent'
-                  : 'bg-surface-strong dark:bg-surface-strong-dark border-border-subtle dark:border-border-subtle-dark'
+                  ? 'bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface dark:bg-surface-dark'
               }`}
             >
               <View className="flex-row items-center">
-                <Text className={`mr-2 ${showFavouritesOnly ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>
+                <Text className={`mr-2 ${showFavouritesOnly ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>
                   {showFavouritesOnly ? '❤️' : '🤍'}
                 </Text>
                 <Text className={`${
-                  showFavouritesOnly ? 'text-text-inverse dark:text-text-inverse-dark' : 'text-text-muted dark:text-text-muted-dark'
+                  showFavouritesOnly ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
                 } text-sm font-medium`}>Saved</Text>
               </View>
             </TouchableOpacity>
@@ -338,12 +427,6 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     padding: 0, // Remove default padding
-  },
-  thumbnail: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
-    marginLeft: 12,
   },
 });
 
