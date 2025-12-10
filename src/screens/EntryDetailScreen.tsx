@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Alert, ActivityIndicator } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { Entry } from '@db/types';
 import { getEntry, deleteEntry } from '@db/queries';
 import { deleteFile } from '@utils/storage';
@@ -8,34 +8,25 @@ import { EntryCard } from '@components/EntryCard';
 import { ReviewScreen } from './ReviewScreen';
 import { DB_DELAYS } from '@utils/constants';
 
-interface EntryDetailScreenProps {
-  // Navigation params
-  route?: {
-    params?: {
-      entryId: string;
-    };
+// Define route params type
+type EntryDetailRouteParams = {
+  EntryDetail: {
+    entryId: string;
   };
-  navigation?: any;
-}
+};
 
-export default function EntryDetailScreen({ route: routeProp, navigation: navigationProp }: EntryDetailScreenProps = {}) {
-  // Use hooks if available, otherwise use props
-  const route = routeProp || useRoute();
-  const navigation = navigationProp || useNavigation();
+export default function EntryDetailScreen() {
+  // Always use hooks - React Navigation provides these
+  const route = useRoute<RouteProp<EntryDetailRouteParams, 'EntryDetail'>>();
+  const navigation = useNavigation();
   
-  const entryId = (route.params as any)?.entryId;
+  const entryId = route.params?.entryId;
   const [entry, setEntry] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
 
-  useEffect(() => {
-    if (entryId) {
-      loadEntry();
-    }
-  }, [entryId]);
-
-  const loadEntry = async (retryCount = 0) => {
+  const loadEntry = useCallback(async (retryCount = 0) => {
     if (!entryId) return;
     setLoading(true);
     
@@ -73,7 +64,13 @@ export default function EntryDetailScreen({ route: routeProp, navigation: naviga
     } finally {
       setLoading(false);
     }
-  };
+  }, [entryId, navigation]);
+
+  useEffect(() => {
+    if (entryId) {
+      loadEntry();
+    }
+  }, [entryId, loadEntry]);
 
   const handleEdit = () => {
     if (entry) {
@@ -121,7 +118,7 @@ export default function EntryDetailScreen({ route: routeProp, navigation: naviga
     );
   };
 
-  const handleSaveComplete = async (updatedEntry: Entry) => {
+  const handleSaveComplete = async (_updatedEntry: Entry) => {
     setShowReview(false);
     setEditingEntry(null);
     await loadEntry(); // Reload to show updated entry

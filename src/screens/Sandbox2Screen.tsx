@@ -1,10 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import Gradient from '../components/Gradient';
-import { useTheme } from '@hooks/useTheme';
 
 export default function Sandbox2Screen() {
-  const { shadows } = useTheme();
 
   return (
     <View className="flex-1 justify-top items-center bg-surface dark:bg-surface-dark px-6 pt-16">

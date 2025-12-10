@@ -5,11 +5,11 @@ import { File } from 'expo-file-system';
 export interface TranscriptionResponse {
   entryId: string;
   transcript: string;
-  segments?: Array<{
+  segments?: {
     start: number;
     end: number;
     text: string;
-  }>;
+  }[];
   audio_url?: string;
   jobId?: string; // For async jobs (not used in M2, but included for future)
 }

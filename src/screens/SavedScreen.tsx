@@ -98,6 +98,7 @@ export default function SavedScreen() {
         sound.unloadAsync().catch(() => {});
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderEntry = ({ item }: { item: Entry }) => {
@@ -136,8 +137,7 @@ export default function SavedScreen() {
 
             <View className="flex-row items-center justify-start gap-2.5 px-2 py-2 self-stretch">
               <ButtonPrimary
-                onPress={(e?: any) => {
-                  e?.stopPropagation();
+                onPress={() => {
                   playEntry(item);
                 }}
                 title={isPlaying ? "Pause" : "Listen"}

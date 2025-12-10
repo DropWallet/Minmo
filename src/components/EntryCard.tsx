@@ -14,7 +14,7 @@ interface EntryCardProps {
   sharedElementId?: string; // For shared element transitions
 }
 
-export function EntryCard({ entry, onEdit, onDelete, sharedElementId }: EntryCardProps) {
+export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedElementId }: EntryCardProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
@@ -158,6 +158,7 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId }: EntryCar
         }),
       ]).start();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
 
   // Cleanup sound on unmount

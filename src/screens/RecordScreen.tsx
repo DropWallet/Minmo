@@ -5,7 +5,6 @@ import { Audio } from 'expo-av';
 import { ReviewScreen } from './ReviewScreen';
 import { ButtonSecondary } from '@components/ButtonSecondary';
 import { ButtonStop } from '@components/ButtonStop';
-import { ButtonIcon } from '@components/ButtonIcon';
 import { getDailyPrompt } from '@utils/prompts';
 import { getTodaysEntry, deleteEntry } from '@db/queries';
 import { Entry } from '@db/types';
@@ -13,12 +12,9 @@ import { deleteFile } from '@utils/storage';
 import { useTheme } from '@hooks/useTheme';
 import { DB_DELAYS, IOS_DELAYS, ANIMATION } from '@utils/constants';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
-import Gradient from '@components/Gradient';
 import AnimatedGradient from '@components/AnimatedGradient';
 import * as Haptics from 'expo-haptics';
-import { ButtonPrimary } from '@/components/ButtonPrimary';
 import { EntryCard } from '@components/EntryCard';
-import { ShadowBox } from '@components/ShadowBox';
 
 export default function RecordScreen() {
   const [isRecording, setIsRecording] = useState(false);
@@ -235,7 +231,7 @@ export default function RecordScreen() {
     return `${mins.toString().padStart(2, '0')}.${secs.toString().padStart(2, '0')}.${ms}`;
   };
 
-  const handleSaveComplete = async (entry: Entry) => {
+  const handleSaveComplete = async (_entry: Entry) => {
     setShowReview(false);
     setAudioUri(null);
     setEditingEntry(null);
