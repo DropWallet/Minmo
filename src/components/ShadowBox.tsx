@@ -22,7 +22,7 @@ export function ShadowBox({
   const { shadows, colors } = useTheme();
   
   // Calculate buffer based on shadow size if not provided
-  const shadowBuffer = buffer ?? (shadowSize === 'cardLarge' ? 12 : shadowSize === 'cardSmall' ? 8 : 8);
+  const shadowBuffer = buffer ?? (shadowSize === 'cardLarge' ? 12 : shadowSize === 'cardSmall' ? 8 : shadowSize === 'buttonPrimary' ? 40 : 8);
   
   // Get shadow style
   const shadowStyleString = shadows[shadowSize as keyof typeof shadows] || shadows.soft;
