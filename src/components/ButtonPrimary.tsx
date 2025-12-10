@@ -33,7 +33,7 @@ export function ButtonPrimary({
       paddingVertical: 12, // h-12 = 48px total
       paddingHorizontal: 16,
       textSize: 'text-base',
-      iconSize: 18,
+      iconSize: 20,
     },
     large: {
       paddingVertical: 20, // py-6 = 24px
@@ -67,7 +67,7 @@ export function ButtonPrimary({
             style={{ marginRight: 8 }} 
           />
         )}
-        <Text className={`${currentSize.textSize} text-text-button-primary dark:text-text-button-primary font-semibold`}>
+        <Text className={`${currentSize.textSize} text-text-button-primary dark:text-text-button-primary-dark font-semibold`}>
           {title}
         </Text>
       </View>

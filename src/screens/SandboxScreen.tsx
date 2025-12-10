@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Gradient from '../components/Gradient';
 import { useTheme } from '@hooks/useTheme';
 import { Icon } from '../components/Icon';
@@ -9,7 +8,6 @@ import { ShadowBox } from '../components/ShadowBox';
 
 
 export default function SandboxScreen() {
-  const navigation = useNavigation();
   const { shadows } = useTheme();
 
   return (

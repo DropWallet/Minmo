@@ -60,11 +60,11 @@ export function ButtonSecondary({
           <Icon 
             name={iconLeft} 
             size={currentSize.iconSize} 
-            color="textMuted" 
+            color="buttonSecondaryIcon" 
             style={{ marginRight: 8 }} 
           />
         )}
-        <Text className={`${currentSize.textSize} text-text-primary dark:text-text-primary-dark font-medium`}>
+        <Text className={`${currentSize.textSize} text-button-secondary-icon dark:text-button-secondary-icon-dark font-medium`}>
           {title}
         </Text>
       </View>

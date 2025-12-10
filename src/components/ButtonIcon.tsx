@@ -29,7 +29,7 @@ export function ButtonIcon({
       width: 48,
       height: 48,
       padding: 12, // 48px / 4 = 12px padding
-      iconSize: 20,
+      iconSize: 18,
     },
     large: {
       width: 64,
@@ -64,5 +64,6 @@ export function ButtonIcon({
     </TouchableOpacity>
   );
 }
+
 
 

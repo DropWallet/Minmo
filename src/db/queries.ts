@@ -753,7 +753,7 @@ export async function searchEntries(query: string, retries = 0): Promise<Entry[]
         [fts5Query]
       );
       // Remove rank property before returning (it's not part of Entry type)
-      return (results || []).map(({ rank, ...entry }) => entry);
+      return (results || []).map(({ rank: _rank, ...entry }) => entry);
     } catch (error) {
       // Fallback to LIKE search with simple scoring
       // Prompt matches rank higher (1) than transcript matches (2)
@@ -773,7 +773,7 @@ export async function searchEntries(query: string, retries = 0): Promise<Entry[]
         [`%${lowerQuery}%`, `%${lowerQuery}%`, searchTerm, searchTerm]
       );
       // Remove match_rank property before returning
-      return (results || []).map(({ match_rank, ...entry }) => entry);
+      return (results || []).map(({ match_rank: _match_rank, ...entry }) => entry);
     }
   } catch (error) {
     console.error('Error in searchEntries:', error);

@@ -4,7 +4,7 @@ import { useTheme } from '@hooks/useTheme';
 import type { ViewStyle, StyleProp } from 'react-native';
 
 interface ShadowBoxProps {
-  shadowSize?: 'soft' | 'hard' | 'neumorphic' | 'metalInner' | 'buttonPrimary' | 'cardLarge';
+  shadowSize?: 'soft' | 'hard' | 'neumorphic' | 'metalInner' | 'buttonPrimary' | 'cardLarge' | 'cardSmall';
   className?: string;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
@@ -22,15 +22,15 @@ export function ShadowBox({
   const { shadows, colors } = useTheme();
   
   // Calculate buffer based on shadow size if not provided
-  const shadowBuffer = buffer ?? (shadowSize === 'cardLarge' ? 12 : 8);
+  const shadowBuffer = buffer ?? (shadowSize === 'cardLarge' ? 12 : shadowSize === 'cardSmall' ? 8 : shadowSize === 'buttonPrimary' ? 40 : 8);
   
   // Get shadow style
-  const shadowStyleString = shadows[shadowSize];
+  const shadowStyleString = shadows[shadowSize as keyof typeof shadows] || shadows.soft;
   
   // Android needs elevation and a solid background color for elevation to work
   const androidShadowStyle = Platform.select({
     android: {
-      elevation: shadowSize === 'cardLarge' ? 12 : shadowSize === 'buttonPrimary' ? 8 : 6,
+      elevation: shadowSize === 'cardLarge' ? 12 : shadowSize === 'cardSmall' ? 6 : shadowSize === 'buttonPrimary' ? 8 : 6,
       backgroundColor: colors.surface, // Solid background needed for elevation (Gradient will cover it)
       borderRadius: 8, // Match card radius
     },

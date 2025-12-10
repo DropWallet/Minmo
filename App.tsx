@@ -8,7 +8,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import './global.css';
 
 // Screens
-import TimelineScreen from './src/screens/TimelineScreen';
+import TimelineStack from './src/navigation/TimelineStack';
+import SavedStack from './src/navigation/SavedStack';
 import RecordScreen from './src/screens/RecordScreen';
 import SettingsStack from './src/navigation/SettingsStack';
 
@@ -124,7 +125,7 @@ export default function App() {
           >
             <Tab.Screen
               name="Timeline"
-              component={TimelineScreen}
+              component={TimelineStack}
               options={{
                 tabBarLabel: 'Timeline',
               }}
@@ -134,6 +135,13 @@ export default function App() {
               component={RecordScreen}
               options={{
                 tabBarLabel: 'Record',
+              }}
+            />
+            <Tab.Screen
+              name="Saved"
+              component={SavedStack}
+              options={{
+                tabBarLabel: 'Saved',
               }}
             />
             <Tab.Screen

@@ -20,6 +20,7 @@ export const colors = {
   buttonPrimary: semanticTheme.colors['button-primary'],
   buttonStrong: semanticTheme.colors['button-strong'],
   buttonSecondary: semanticTheme.colors['button-secondary'],
+  buttonSecondaryIcon: semanticTheme.colors['button-secondary-icon'],
   buttonSecondaryStrong: semanticTheme.colors['button-secondary-strong'],
   buttonGhost: semanticTheme.colors['button-ghost'],
   buttonGhostStrong: semanticTheme.colors['button-ghost-strong'],
@@ -124,14 +125,16 @@ export const shadows: {
   metalInner: string;
   buttonPrimary: string;
   cardLarge: string;
+  cardSmall: string;
   shadowColor?: string;
 } = {
   soft: '0 6 24 -8 rgba(0,0,0,0.35)',
   hard: '0 8 30 -10 rgba(0,0,0,0.45)',
   neumorphic: '4px 4px 6px -2px rgba(0, 0, 0, 0.24), -4px -4px 6px -2px rgba(255, 255, 255, 0.57)',
   metalInner: 'inset -1px -2px rgba(255, 255, 255, 0.44)',
-  buttonPrimary: '2px 8px 24px -2pxrgba(53, 83, 14, 0.16), 0 2px 1px 0rgba(53, 83, 14, 0.40), 0 4px 10px -4pxrgba(53, 83, 14, 0.12), -2px -2px 4px -2px #FFF',
+  buttonPrimary: '0 109px 31px 0 rgba(44, 186, 169, 0.00), 0 70px 28px 0 rgba(44, 186, 169, 0.03), 0 39px 24px 0 rgba(44, 186, 169, 0.09), 0 17px 17px 0 rgba(44, 186, 169, 0.16), 0 4px 10px 0 rgba(44, 186, 169, 0.18)',
   cardLarge: '0 109px 31px 0 rgba(38, 70, 6, 0.00), 0 70px 28px 0 rgba(38, 70, 6, 0.01), 0 39px 24px 0 rgba(38, 70, 6, 0.04), 0 17px 17px 0 rgba(38, 70, 6, 0.07), 0 4px 10px 0 rgba(38, 70, 6, 0.08)',
+  cardSmall: '0 29px 8px 0 rgba(0, 0, 0, 0.00), 0 19px 8px 0 rgba(0, 0, 0, 0.01), 0 11px 6px 0 rgba(0, 0, 0, 0.05), 0 5px 5px 0 rgba(0, 0, 0, 0.09), 0 1px 3px 0 rgba(0, 0, 0, 0.10)',
 };
 
 // ============================================================================
@@ -210,6 +213,7 @@ export type ThemeColors = {
   buttonPrimary: string;
   buttonStrong: string;
   buttonSecondary: string;
+  buttonSecondaryIcon: string;
   buttonSecondaryStrong: string;
   buttonGhost: string;
   buttonGhostStrong: string;
@@ -248,6 +252,7 @@ export function getColors(isDark: boolean = false): ThemeColors {
       buttonPrimary: semanticTheme.colors['button-primary-dark'],
       buttonStrong: semanticTheme.colors['button-strong-dark'],
       buttonSecondary: semanticTheme.colors['button-secondary-dark'],
+      buttonSecondaryIcon: semanticTheme.colors['button-secondary-icon-dark'],
       buttonSecondaryStrong: semanticTheme.colors['button-secondary-strong-dark'],
       buttonGhost: semanticTheme.colors['button-ghost-dark'],
       buttonGhostStrong: semanticTheme.colors['button-ghost-strong-dark'],
@@ -285,6 +290,7 @@ export function getColors(isDark: boolean = false): ThemeColors {
     buttonPrimary: semanticTheme.colors['button-primary'],
     buttonStrong: semanticTheme.colors['button-strong'],
     buttonSecondary: semanticTheme.colors['button-secondary'],
+    buttonSecondaryIcon: semanticTheme.colors['button-secondary-icon'],
     buttonSecondaryStrong: semanticTheme.colors['button-secondary-strong'],
     buttonGhost: semanticTheme.colors['button-ghost'],
     buttonGhostStrong: semanticTheme.colors['button-ghost-strong'],
@@ -391,8 +397,9 @@ export function getShadows(isDark: boolean = false) {
       hard: '0 8 30 -10 rgba(0,0,0,0.6)',
       neumorphic: '4px 4px 6px -2px rgba(0, 0, 0, 0.4), -4px -4px 6px -2px rgba(255, 255, 255, 0.07)',
       metalInner: 'inset -1px -2px 0 rgba(255, 255, 255, 0.26)',
-      buttonPrimary: '2px 3px 12px -2px #35530E, 0 3px 1px 0 #35530E, 0 4px 10px -4px #35530E, -2px -2px 4px -2px rgba(255, 255, 255, 0.1)',
+      buttonPrimary: '0 109px 31px 0 rgba(44, 186, 169, 0.00), 0 70px 28px 0 rgba(44, 186, 169, 0.03), 0 39px 24px 0 rgba(44, 186, 169, 0.09), 0 17px 17px 0 rgba(44, 186, 169, 0.16), 0 4px 10px 0 rgba(44, 186, 169, 0.18)',
       cardLarge: '0 109px 31px 0 rgba(38, 70, 6, 0.00), 0 70px 28px 0 rgba(38, 70, 6, 0.01), 0 39px 24px 0 rgba(38, 70, 6, 0.04), 0 17px 17px 0 rgba(38, 70, 6, 0.07), 0 4px 10px 0 rgba(38, 70, 6, 0.08)',
+      cardSmall: '0 29px 8px 0 rgba(0, 0, 0, 0.00), 0 19px 8px 0 rgba(0, 0, 0, 0.01), 0 11px 6px 0 rgba(0, 0, 0, 0.05), 0 5px 5px 0 rgba(0, 0, 0, 0.09), 0 1px 3px 0 rgba(0, 0, 0, 0.10)',
       shadowColor: shadows.shadowColor,
     };
   }

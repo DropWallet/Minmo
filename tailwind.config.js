@@ -16,20 +16,22 @@ const semanticTheme = {
     'surface-strong-dark': tailwindColors.slate[950],  // Dark: #020617
     'surface-mid': tailwindColors.stone[300], // Light: #e4e4e7
     'surface-mid-dark': tailwindColors.slate[800],  // Dark: #27272a
-    'surface-brand-weak': tailwindColors.lime[100],
-    'surface-brand-weak-dark': tailwindColors.lime[900],
+    'surface-brand-weak': tailwindColors.teal[100],
+    'surface-brand-weak-dark': tailwindColors.teal[900],
     overlay: 'rgba(248,250,252,0.7)',         // Light: slate-50 with opacity
     'overlay-dark': 'rgba(15,23,42,0.7)',     // Dark: slate-900 with opacity
     'surface-inverted': tailwindColors.slate[950], // Light: dark bg
     'surface-inverted-dark': tailwindColors.slate[100], // Dark: light bg
     
     // Button colors - Light mode defaults with dark mode variants
-    'button-primary': tailwindColors.lime[300],
-    'button-primary-dark': tailwindColors.lime[400],
-    'button-strong': tailwindColors.lime[600],
-    'button-strong-dark': tailwindColors.lime[500],
-    'button-secondary': tailwindColors.slate[200],
-    'button-secondary-dark': tailwindColors.slate[700],
+    'button-primary': tailwindColors.teal[200],
+    'button-primary-dark': tailwindColors.teal[300],
+    'button-strong': tailwindColors.teal[400],
+    'button-strong-dark': tailwindColors.teal[600],
+    'button-secondary': 'rgba(0, 0, 0, 0.1)',
+    'button-secondary-dark': 'rgba(255, 255, 255, 0.10)',
+    'button-secondary-icon': 'rgba(0, 0, 0, 0.6)',
+    'button-secondary-icon-dark': 'rgba(255, 255, 255, 0.6)',
     'button-secondary-strong': tailwindColors.lime[800],
     'button-secondary-strong-dark': tailwindColors.lime[700],
     'button-ghost': tailwindColors.lime[900],
@@ -48,12 +50,12 @@ const semanticTheme = {
     'text-muted-dark': tailwindColors.slate[400],  // Dark: #94a3b8
     'text-inverse': tailwindColors.slate[200],     // Light: light text
     'text-inverse-dark': tailwindColors.slate[900],  // Dark: dark text
-    'text-button-primary': tailwindColors.lime[900],  // Light: lime-900
-    'text-button-primary-dark': tailwindColors.lime[800],  // Dark: lime-50
+    'text-button-primary': tailwindColors.teal[900],  // Light: lime-900
+    'text-button-primary-dark': tailwindColors.teal[900],  // Dark: lime-50
     'text-button-stop': tailwindColors.red[900],
     'text-button-stop-dark': tailwindColors.red[200],
-    'text-brand': tailwindColors.lime[600],       // Light: lime-700
-    'text-brand-dark': tailwindColors.lime[300],  // Dark: lime-300
+    'text-brand': tailwindColors.teal[600],       // Light: lime-700
+    'text-brand-dark': tailwindColors.teal[300],  // Dark: lime-300
     
     // Accent colors - Multiple accent variants with dark mode support
     accent: tailwindColors.sky[400],                    // Original blue value (backward compat)
@@ -68,8 +70,8 @@ const semanticTheme = {
     'border-subtle-dark': tailwindColors.slate[800],  // Dark: #1e293b
     'border-default': tailwindColors.slate[300],   // Light: #cbd5e1
     'border-default-dark': tailwindColors.slate[700],  // Dark: #334155
-    'border-button-primary': tailwindColors.lime[400],  // Light: lime-400
-    'border-button-primary-dark': tailwindColors.lime[600],  // Dark: lime-600
+    'border-button-primary': tailwindColors.teal[800],  // Light: lime-400
+    'border-button-primary-dark': tailwindColors.teal[800],  // Dark: lime-600
     
     // Status colors (same for both modes)
     success: tailwindColors.green[500],        // #22c55e

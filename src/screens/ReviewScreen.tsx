@@ -143,6 +143,7 @@ export function ReviewScreen({
         autoSaveTimeoutRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, audioUri, duration, prompt, transcriptionEnabled]); // Removed currentEntryId to avoid blocking retries
 
   const playSound = async () => {
@@ -241,7 +242,7 @@ export function ReviewScreen({
     }
   };
 
-  const formatDuration = (seconds: number): string => {
+  const _formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -425,8 +426,8 @@ export function ReviewScreen({
   const entryDate = existingEntry 
     ? new Date(existingEntry.recorded_at) 
     : new Date();
-  const formattedDate = formatDateWithOrdinal(entryDate);
-  const formattedTime = entryDate.toLocaleTimeString('en-US', { 
+  const _formattedDate = formatDateWithOrdinal(entryDate);
+  const _formattedTime = entryDate.toLocaleTimeString('en-US', { 
     hour: '2-digit', 
     minute: '2-digit',
     hour12: false 
@@ -667,7 +668,7 @@ export function ReviewScreen({
   );
 }
 
-const styles = StyleSheet.create({
+const _styles = StyleSheet.create({
   photoPreview: {
     width: 120,
     height: 120,
