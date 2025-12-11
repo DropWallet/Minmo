@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Alert, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Alert, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { ReviewScreen } from './ReviewScreen';
@@ -12,7 +12,7 @@ import { deleteFile } from '@utils/storage';
 import { useTheme } from '@hooks/useTheme';
 import { DB_DELAYS, IOS_DELAYS, ANIMATION } from '@utils/constants';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
-import AnimatedGradient from '@components/AnimatedGradient';
+import Gradient from '@components/Gradient';
 import * as Haptics from 'expo-haptics';
 import { EntryCard } from '@components/EntryCard';
 
@@ -317,27 +317,18 @@ export default function RecordScreen() {
   // Show today's entry card if it exists
   if (todaysEntry && !isRecording) {
     return (
-      <EntryCard
-        entry={todaysEntry}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Gradient className="flex-1">
+        <EntryCard
+          entry={todaysEntry}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Gradient>
     );
   }
 
   return (
-    <AnimatedGradient
-      colors={[
-        '#FAF5FF', // purple-50
-        '#FEFCE8', // yellow-50
-        '#FAF5FF', // purple-50
-        '#EEF2FF', // indigo-50
-      ]}
-      locations={[0.0125, 0.3022, 0.7123, 0.9287]}
-      angle={167}
-      duration={5000}
-      className="flex-1 p-6"
-    >
+    <Gradient className="flex-1 p-6">
       {isRecording ? (
         <View className="flex-1 justify-center items-center">
           <Text className="text-text-button-primary dark:text-text-brand-dark bg-surface-brand-weak dark:bg-surface-brand-weak-dark font-semibold text-sm text-center py-2 px-4 rounded-full mt-16">
@@ -420,7 +411,7 @@ export default function RecordScreen() {
             </View>
         </View>
       )}
-    </AnimatedGradient>
+    </Gradient>
   );
 }
 

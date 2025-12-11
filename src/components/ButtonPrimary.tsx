@@ -53,7 +53,7 @@ export function ButtonPrimary({
       disabled={disabled}
     >
       <View 
-        className={`bg-button-primary dark:bg-button-primary-dark flex-row justify-center rounded-full overflow-hidden items-center ${disabled ? 'opacity-60' : ''}`}
+        className={`bg-button-primary border-2 border-border-default dark:bg-button-primary-dark flex-row justify-center rounded-full overflow-hidden items-center ${disabled ? 'opacity-60' : ''}`}
         style={{ 
           paddingVertical: currentSize.paddingVertical,
           paddingHorizontal: currentSize.paddingHorizontal,

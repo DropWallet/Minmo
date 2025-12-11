@@ -5,9 +5,9 @@ import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
 import { getEntries, searchEntries } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
-import { ShadowBox } from '@components/ShadowBox';
-import { ButtonPrimary } from '@components/ButtonPrimary';
+import { ButtonIcon } from '@components/ButtonIcon';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
+import Gradient from '@components/Gradient';
 
 type ViewMode = 'list' | 'grid' | 'card';
 
@@ -95,10 +95,17 @@ export default function TimelineScreen() {
   // Reload entries whenever the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      // Reload current view (maintains search if active)
-      // Use refs to avoid dependencies that cause re-renders and loops
-      const currentQuery = searchQueryRef.current.trim().length >= 2 ? searchQueryRef.current : undefined;
-      loadEntries(currentQuery);
+      // Delay to ensure component is mounted before updating state
+      const timer = setTimeout(() => {
+        // Reload current view (maintains search if active)
+        // Use refs to avoid dependencies that cause re-renders and loops
+        const currentQuery = searchQueryRef.current.trim().length >= 2 ? searchQueryRef.current : undefined;
+        loadEntries(currentQuery);
+      }, 0);
+      
+      return () => {
+        clearTimeout(timer);
+      };
     }, [loadEntries]) // Only depend on loadEntries to prevent re-renders and loops
   );
 
@@ -185,44 +192,59 @@ export default function TimelineScreen() {
         activeOpacity={0.9}
         className="mb-4"
       >
-        <View className="bg-surface dark:bg-surface-dark rounded-2xl p-1.5">
-          <View className="flex-col gap-0.5">
-            {/* Top: Image and Text Row */}
-            <View className="flex-row items-start self-stretch">
-              {item.photo_local_uri ? (
-                <ShadowBox shadowSize="cardSmall" className="w-[74px] h-[74px] rounded-lg overflow-hidden">
-                  <Image
-                    source={{ uri: item.photo_local_uri }}
-                    className="w-full h-full"
-                    style={{ resizeMode: 'cover' }}
-                  />
-                </ShadowBox>
-              ) : null}
-              <View className="flex-col items-start gap-0.5 flex-1 pt-3">
-                <Text className="text-xs font-semibold text-text-muted dark:text-text-muted-dark pl-2">
-                  {formattedDate}
-                </Text>
-                <Text className="text-2xl font-serif-semibold tracking-tighter leading-tight text-text-primary dark:text-text-primary-dark self-stretch pl-2">
-                  {item.prompt || 'Untitled Moment'}
-                </Text>
+        <View className="border-2 border-border-default dark:border-border-default-dark bg-surface-trans dark:bg-surface-trans-dark rounded-2xl p-4">
+          <View className="flex-col gap-4 self-stretch">
+            {/* Image at top */}
+            {item.photo_local_uri && (
+              <View className="w-[88px] h-[88px] rounded-[9.51px] overflow-hidden">
+                <Image
+                  source={{ uri: item.photo_local_uri }}
+                  className="w-full h-full"
+                  style={{ resizeMode: 'cover' }}
+                />
               </View>
-            </View>
+            )}
 
-            {/* Bottom: Button and Duration Row */}
-            <View className="flex-row items-center justify-start gap-2.5 px-2 py-2 self-stretch">
-              <ButtonPrimary
-                onPress={() => {
-                  playEntry(item);
-                }}
-                title={isPlaying ? "Pause" : "Listen"}
-                iconLeft={isPlaying ? "ic-pause.svg" : "ic-play.svg"}
-                size="small"
-              />
-              {durationText && (
-                <Text className="flex-1 text-sm font-semibold text-right text-text-muted dark:text-text-muted-dark">
-                  {durationText}
+            {/* Prompt and Transcript */}
+            <View className="flex-col gap-0.5 self-stretch">
+              <Text className="text-base font-semibold text-text-brand dark:text-text-brand-dark"
+              numberOfLines={1}
+              ellipsizeMode="tail">
+                {item.prompt || 'Untitled Moment'}
+              </Text>
+              {item.transcript && (
+                <Text 
+                  className="text-xl font-serif-medium text-text-primary dark:text-text-secondary-dark"
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {item.transcript}
                 </Text>
               )}
+            </View>
+
+            {/* Bottom Row: Date/Duration and Play Button */}
+            <View className="flex-row justify-between items-center self-stretch">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
+                  {formattedDate}
+                </Text>
+                <View className="w-1.5 h-1.5 rounded-full bg-text-muted dark:bg-text-muted-dark" />
+                {durationText && (
+                  <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
+                    {durationText}
+                  </Text>
+                )}
+              </View>
+              <ButtonIcon
+                onPress={(e) => {
+                  e?.stopPropagation();
+                  playEntry(item);
+                }}
+                icon={isPlaying ? "ic-pause" : "ic-play-slim"}
+                size="small"
+                variant="primary"
+              />
             </View>
           </View>
         </View>
@@ -248,18 +270,18 @@ export default function TimelineScreen() {
 
   if (loading && entries.length === 0) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark items-center justify-center">
+      <Gradient className="flex-1 items-center justify-center">
         <Text className="text-text-secondary dark:text-text-secondary-dark">Loading...</Text>
-      </View>
+      </Gradient>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface-strong dark:bg-surface-strong-dark pt-16">
+    <Gradient className="flex-1 pt-16">
       <View className="px-4 py-1">
         
         {/* Search Input */}
-        <View className="flex-row items-center bg-surface dark:bg-surface-dark rounded-full border border-border-subtle dark:border-border-subtle-dark px-3 py-3 mb-4">
+        <View className="flex-row items-center bg-surface-trans dark:bg-surface-trans-dark rounded-full border border-border-subtle dark:border-border-subtle-dark px-3 py-3 mb-4">
           <Text className="text-text-muted dark:text-text-muted-dark mr-2">🔍</Text>
           <TextInput
             value={searchQuery}
@@ -287,8 +309,8 @@ export default function TimelineScreen() {
               onPress={() => handleViewModeChange('grid')}
               className={`px-4 py-2 rounded-full ${
                 viewMode === 'grid'
-                  ? 'bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface dark:bg-surface-dark'
+                  ? 'border-2 border-border-default dark:border-border-default bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface-trans dark:bg-surface-trans-dark border border-border-subtle dark:border-border-default-dark'
               }`}
             >
               <View className="flex-row items-center">
@@ -303,8 +325,8 @@ export default function TimelineScreen() {
               onPress={() => handleViewModeChange('list')}
               className={`px-4 py-2 rounded-full ${
                 viewMode === 'list'
-                  ? 'bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface dark:bg-surface-dark'
+                  ? 'border-2 border-border-default dark:border-border-default bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface-trans dark:bg-surface-trans-dark border border-border-subtle dark:border-border-default-dark'
               }`}
             >
               <View className="flex-row items-center">
@@ -319,8 +341,8 @@ export default function TimelineScreen() {
               onPress={() => handleViewModeChange('card')}
               className={`px-4 py-2 rounded-full ${
                 viewMode === 'card'
-                  ? 'bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface dark:bg-surface-dark'
+                  ? 'border-2 border-border-default dark:border-border-default bg-button-primary dark:bg-button-primary-dark'
+                  : 'bg-surface-trans dark:bg-surface-trans-dark border border-border-subtle dark:border-border-default-dark'
               }`}
             >
               <View className="flex-row items-center">
@@ -360,7 +382,7 @@ export default function TimelineScreen() {
           {viewMode === 'card' && renderCardView()}
         </>
       )}
-    </View>
+    </Gradient>
   );
 }
 
@@ -372,4 +394,5 @@ const styles = StyleSheet.create({
     padding: 0, // Remove default padding
   },
 });
+
 

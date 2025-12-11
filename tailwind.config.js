@@ -11,7 +11,7 @@ const semanticTheme = {
   colors: {
     // Surface colors - Light mode defaults with dark mode variants
     surface: tailwindColors.slate[50],        // Light: #f8fafc
-    'surface-dark': tailwindColors.slate[800],  // Dark: #0f172a
+    'surface-dark': tailwindColors.slate[950],  // Dark: #0f172a
     'surface-strong': tailwindColors.slate[200], // Light: #f1f5f9
     'surface-strong-dark': tailwindColors.slate[950],  // Dark: #020617
     'surface-mid': tailwindColors.stone[300], // Light: #e4e4e7
@@ -22,6 +22,10 @@ const semanticTheme = {
     'overlay-dark': 'rgba(15,23,42,0.7)',     // Dark: slate-900 with opacity
     'surface-inverted': tailwindColors.slate[950], // Light: dark bg
     'surface-inverted-dark': tailwindColors.slate[100], // Dark: light bg
+    'surface-trans': 'rgba(255, 255, 255, 0.60)', // Light: white with 60% opacity
+    'surface-trans-dark': 'rgba(255, 255, 255, 0.08)', // Dark: white with 6% opacity
+    'surface-trans-full': 'rgba(255, 255, 255, 0)', // Light: fully transparent white
+    'surface-trans-full-dark': 'rgba(255, 255, 255, 0)', // Dark: fully transparent white
     
     // Button colors - Light mode defaults with dark mode variants
     'button-primary': tailwindColors.teal[200],
@@ -58,7 +62,8 @@ const semanticTheme = {
     'text-brand-dark': tailwindColors.teal[300],  // Dark: lime-300
     
     // Accent colors - Multiple accent variants with dark mode support
-    accent: tailwindColors.sky[400],                    // Original blue value (backward compat)
+    accent: tailwindColors.teal[400], 
+    'accent-dark': tailwindColors.teal[400],                   // Original blue value (backward compat)
     'accent-orange': tailwindColors.orange[300],        // Light: orange-300
     'accent-orange-dark': tailwindColors.orange[900],    // Dark: orange-900
     'accent-red': tailwindColors.red[400],              // Light: red-400
@@ -66,10 +71,10 @@ const semanticTheme = {
     'accent-strong': tailwindColors.sky[500],           // Same for both modes: sky-500
     
     // Border colors - Light mode defaults with dark mode variants
-    'border-subtle': tailwindColors.slate[200],    // Light: #e2e8f0
-    'border-subtle-dark': tailwindColors.slate[800],  // Dark: #1e293b
-    'border-default': tailwindColors.slate[300],   // Light: #cbd5e1
-    'border-default-dark': tailwindColors.slate[700],  // Dark: #334155
+    'border-subtle': 'rgba(0, 0, 0, 0.12)',    // Light: #e2e8f0
+    'border-subtle-dark': 'rgba(255, 255, 255, 0.16)',  // Dark: #1e293b
+    'border-default': tailwindColors.teal[600],   // Light: #cbd5e1
+    'border-default-dark': 'rgba(255, 255, 255, 0.16)',  // Dark: #334155
     'border-button-primary': tailwindColors.teal[800],  // Light: lime-400
     'border-button-primary-dark': tailwindColors.teal[800],  // Dark: lime-600
     

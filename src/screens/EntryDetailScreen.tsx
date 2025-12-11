@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Alert, ActivityIndicator } from 'react-native';
+import { Alert, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { Entry } from '@db/types';
 import { getEntry, deleteEntry } from '@db/queries';
@@ -7,6 +7,7 @@ import { deleteFile } from '@utils/storage';
 import { EntryCard } from '@components/EntryCard';
 import { ReviewScreen } from './ReviewScreen';
 import { DB_DELAYS } from '@utils/constants';
+import Gradient from '@components/Gradient';
 
 // Define route params type
 type EntryDetailRouteParams = {
@@ -142,17 +143,19 @@ export default function EntryDetailScreen() {
 
   if (loading || !entry) {
     return (
-      <View className="flex-1 bg-surface-strong dark:bg-surface-strong-dark items-center justify-center">
+      <Gradient className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
-      </View>
+      </Gradient>
     );
   }
 
   return (
-    <EntryCard
-      entry={entry}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-    />
+    <Gradient className="flex-1">
+      <EntryCard
+        entry={entry}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    </Gradient>
   );
 }

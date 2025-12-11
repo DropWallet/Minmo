@@ -1,11 +1,12 @@
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View, GestureResponderEvent } from 'react-native';
 import { Icon } from '@components/Icon';
 
 interface ButtonIconProps {
-  onPress: () => void;
+  onPress: (e?: GestureResponderEvent) => void;
   icon: string; // e.g., 'ic-edit.svg'
   size?: 'small' | 'medium' | 'large';
+  variant?: 'secondary' | 'primary';
   className?: string;
   activeOpacity?: number;
 }
@@ -14,6 +15,7 @@ export function ButtonIcon({
   onPress, 
   icon,
   size = 'medium',
+  variant = 'secondary',
   className = '',
   activeOpacity = 0.9
 }: ButtonIconProps) {
@@ -23,7 +25,7 @@ export function ButtonIcon({
       width: 36,
       height: 36,
       padding: 9, // 36px / 4 = 9px padding
-      iconSize: 18,
+      iconSize: 14,
     },
     medium: {
       width: 48,
@@ -48,7 +50,11 @@ export function ButtonIcon({
       className={className}
     >
       <View 
-        className="bg-button-secondary dark:bg-button-secondary-dark rounded-full items-center justify-center"
+        className={`rounded-full items-center justify-center ${
+          variant === 'primary' 
+            ? 'bg-button-primary dark:bg-button-primary-dark' 
+            : 'bg-button-secondary border-2 border-border-subtle dark:bg-button-secondary-dark'
+        }`}
         style={{ 
           width: currentSize.width,
           height: currentSize.height,
@@ -58,12 +64,13 @@ export function ButtonIcon({
         <Icon 
           name={icon} 
           size={currentSize.iconSize} 
-          color="textMuted" 
+          color={variant === 'primary' ? 'textButtonPrimary' : 'textMuted'} 
         />
       </View>
     </TouchableOpacity>
   );
 }
+
 
 
 
