@@ -6,7 +6,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const semanticTheme = require('./tailwind.config.js').semanticTheme;
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-const tailwindColors = require('./tailwind.config.js').tailwindColors;
+const _tailwindColors = require('./tailwind.config.js').tailwindColors;
 
 // ============================================================================
 // SEMANTIC COLOR TOKENS

@@ -31,7 +31,7 @@ export default function SettingsStack() {
       <Stack.Screen 
         name="Sandbox2" 
         component={Sandbox2Screen}
-        options={({ route }) => ({
+        options={({ route: _route }) => ({
           headerShown: true,
           headerTransparent: true,
           headerTitle: 'Toolbar',

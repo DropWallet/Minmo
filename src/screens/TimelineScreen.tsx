@@ -5,7 +5,6 @@ import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
 import { getEntries, searchEntries } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
-import { ShadowBox } from '@components/ShadowBox';
 import { ButtonIcon } from '@components/ButtonIcon';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import Gradient from '@components/Gradient';

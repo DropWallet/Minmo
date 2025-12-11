@@ -1,9 +1,9 @@
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View, GestureResponderEvent } from 'react-native';
 import { Icon } from '@components/Icon';
 
 interface ButtonIconProps {
-  onPress: (e?: any) => void;
+  onPress: (e?: GestureResponderEvent) => void;
   icon: string; // e.g., 'ic-edit.svg'
   size?: 'small' | 'medium' | 'large';
   variant?: 'secondary' | 'primary';

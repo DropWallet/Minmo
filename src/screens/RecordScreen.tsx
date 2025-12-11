@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Alert, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Alert, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { ReviewScreen } from './ReviewScreen';
