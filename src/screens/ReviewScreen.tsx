@@ -434,7 +434,7 @@ export function ReviewScreen({
   });
 
   return (
-    <View className="flex-1 items-center justify-center bg-surface dark:bg-surface-dark px-4 py-6">
+    <Gradient className="flex-1 items-center justify-center px-4 py-6">
       {/* Top: Date and Duration */}
     
 
@@ -664,7 +664,7 @@ export function ReviewScreen({
           />
         </View>
       </View>
-    </View>
+    </Gradient>
   );
 }
 

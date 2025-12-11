@@ -284,7 +284,7 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedEle
 
   return (
     <Animated.View 
-      className="flex-1 flex-col justify-center bg-surface-strong dark:bg-surface-strong-dark"
+      className="flex-1 flex-col justify-center"
       style={{
         paddingHorizontal: paddingAnim.interpolate({
           inputRange: [0, 1],
@@ -312,8 +312,8 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedEle
             justifyContent: 'center',
           }}
         >
-          <Animated.View 
-            className="flex-col bg-surface dark:bg-surface-dark items-start overflow-hidden"
+            <Animated.View 
+              className="flex-col bg-surface-trans dark:bg-surface-trans-dark items-start overflow-hidden"
             style={{
               width: cardScaleAnim.interpolate({
                 inputRange: [0, 1],

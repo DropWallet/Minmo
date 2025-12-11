@@ -17,6 +17,8 @@ export const colors = {
   overlay: semanticTheme.colors.overlay,
   surfaceInverted: semanticTheme.colors['surface-inverted'],
   surfaceBrandWeak: semanticTheme.colors['surface-brand-weak'],
+  surfaceTrans: semanticTheme.colors['surface-trans'],
+  surfaceTransFull: semanticTheme.colors['surface-trans-full'],
   buttonPrimary: semanticTheme.colors['button-primary'],
   buttonStrong: semanticTheme.colors['button-strong'],
   buttonSecondary: semanticTheme.colors['button-secondary'],
@@ -208,6 +210,8 @@ export type ThemeColors = {
   surfaceStrong: string;
   surfaceMid: string;
   surfaceBrandWeak: string;
+  surfaceTrans: string;
+  surfaceTransFull: string;
   overlay: string;
   surfaceInverted: string;
   buttonPrimary: string;
@@ -247,6 +251,8 @@ export function getColors(isDark: boolean = false): ThemeColors {
       surfaceStrong: semanticTheme.colors['surface-strong-dark'],
       surfaceMid: semanticTheme.colors['surface-mid-dark'],
       surfaceBrandWeak: semanticTheme.colors['surface-brand-weak-dark'],
+      surfaceTrans: semanticTheme.colors['surface-trans-dark'],
+      surfaceTransFull: semanticTheme.colors['surface-trans-full-dark'],
       overlay: semanticTheme.colors['overlay-dark'],
       surfaceInverted: semanticTheme.colors['surface-inverted-dark'],
       buttonPrimary: semanticTheme.colors['button-primary-dark'],
@@ -285,6 +291,8 @@ export function getColors(isDark: boolean = false): ThemeColors {
     surfaceStrong: semanticTheme.colors['surface-strong'],
     surfaceMid: semanticTheme.colors['surface-mid'],
     surfaceBrandWeak: semanticTheme.colors['surface-brand-weak'],
+    surfaceTrans: semanticTheme.colors['surface-trans'],
+    surfaceTransFull: semanticTheme.colors['surface-trans-full'],
     overlay: semanticTheme.colors.overlay,
     surfaceInverted: semanticTheme.colors['surface-inverted'],
     buttonPrimary: semanticTheme.colors['button-primary'],

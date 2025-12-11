@@ -6,6 +6,7 @@ import { useAppStore } from '@store/useAppStore';
 import { resetDatabase, nuclearReset } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
 import { saveThemePreference } from '@utils/themeStorage';
+import Gradient from '@components/Gradient';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
@@ -145,7 +146,8 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-surface dark:bg-surface-dark">
+    <Gradient className="flex-1">
+      <ScrollView className="flex-1">
       <View className="px-4 py-6">
         <Text className="text-text-primary dark:text-text-primary-dark text-2xl font-semibold mb-8">Settings</Text>
 
@@ -341,6 +343,7 @@ export default function SettingsScreen() {
         </View>
       </View>
     </ScrollView>
+    </Gradient>
   );
 }
 

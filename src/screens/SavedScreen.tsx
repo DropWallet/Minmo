@@ -7,6 +7,7 @@ import { getFavouriteEntries } from '@db/queries';
 import { ShadowBox } from '@components/ShadowBox';
 import { ButtonPrimary } from '@components/ButtonPrimary';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
+import Gradient from '@components/Gradient';
 
 type ViewMode = 'list' | 'grid' | 'card';
 
@@ -174,14 +175,14 @@ export default function SavedScreen() {
 
   if (loading && entries.length === 0) {
     return (
-      <View className="flex-1 bg-surface dark:bg-surface-dark items-center justify-center">
+      <Gradient className="flex-1 items-center justify-center">
         <Text className="text-text-secondary dark:text-text-secondary-dark">Loading...</Text>
-      </View>
+      </Gradient>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface-strong dark:bg-surface-strong-dark pt-16">
+    <Gradient className="flex-1 pt-16">
       <View className="px-4 py-1">
         <Text className="font-serif-semibold text-4xl text-text-primary dark:text-text-primary-dark mb-4">
           Saved
@@ -264,7 +265,7 @@ export default function SavedScreen() {
           {viewMode === 'card' && renderCardView()}
         </>
       )}
-    </View>
+    </Gradient>
   );
 }
 

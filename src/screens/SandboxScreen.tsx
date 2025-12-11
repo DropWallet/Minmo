@@ -1,62 +1,146 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import Gradient from '../components/Gradient';
-import { useTheme } from '@hooks/useTheme';
-import { Icon } from '../components/Icon';
-import { ShadowBox } from '../components/ShadowBox';
-
-
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { Audio } from 'expo-av';
+import Gradient from '@components/Gradient';
+import { getEntries } from '@db/queries';
+import { Entry } from '@db/types';
+import { ShadowBox } from '@/components/ShadowBox';
+import { ButtonPrimary } from '@components/ButtonPrimary';
+import { ButtonIcon } from '@components/ButtonIcon';
+import { formatDateWithOrdinal } from '@utils/dateFormat';
 
 export default function SandboxScreen() {
-  const { shadows } = useTheme();
+  const [latestEntry, setLatestEntry] = useState<Entry | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadLatestEntry = async () => {
+        try {
+          const entries = await getEntries(100); // Get entries to find one with photo
+          const entryWithPhoto = entries.find(entry => entry.photo_local_uri);
+          setLatestEntry(entryWithPhoto || null);
+        } catch (error) {
+          console.error('Error loading latest entry:', error);
+        }
+      };
+      loadLatestEntry();
+    }, [])
+  );
+
+  // Cleanup sound on unmount
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
+
+  const playEntry = async () => {
+    if (!latestEntry?.audio_local_uri) return;
+
+    try {
+      if (sound) {
+        if (isPlaying) {
+          await sound.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          await sound.playAsync();
+          setIsPlaying(true);
+        }
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: latestEntry.audio_local_uri },
+          { shouldPlay: true }
+        );
+        setSound(newSound);
+        setIsPlaying(true);
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setIsPlaying(false);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    }
+  };
 
   return (
-    <View className="flex-1 justify-center items-center bg-surface dark:bg-surface-dark p-6">
-         <Text className="text-text-muted dark:text-text-muted-dark font-bold text-md mb-4">5th Dec 2025</Text>
-         <Text className="text-text-primary dark:text-text-primary-dark font-serif-semibold text-center text-4xl leading-tight tracking-tighter mb-10">Tell me one thing that made you laugh today</Text>
-         <View className="w-full flex-row items-center justify-center h-20 border-2 border-border-button-primary dark:border-border-button-primary-dark bg-button-primary dark:bg-button-primary-dark p-1.5 rounded-full" 
-         style={{ boxShadow: shadows.buttonPrimary }}>
-            <Gradient name="button-primary-fill" className="flex-1 h-full flex-row items-center justify-center rounded-full overflow-hidden" >
-                <View className="flex-row items-center justify-center">
-                    <View className="w-6 h-6 mr-3 bg-text-button-primary dark:bg-text-button-primary-dark rounded-full"></View>
-                    <Text className="text-text-primary text-center font-semibold text-lg tracking-tight text-text-button-primary">Record</Text>
-                </View>
-            </Gradient>
-         </View>
-         
-      {/* Version 2: Photo Add Button Card */}
-      <ShadowBox shadowSize="cardLarge" className="mt-10">
-        <Gradient 
-          name="surface-card"
-          className="w-[208px] h-[208px]"
-          style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 12, paddingBottom: 48 }}
-        >
-          {/* Inner container with gradient effect */}
-          <Gradient 
-            name="surface-card-inner" 
-            className="flex-1 self-stretch justify-center items-center"
-            style={{ gap: 8 }}
-          >
-            {/* Icon and Text Container */}
-            <View className="items-center" style={{ width: 79, gap: 6 }}>
-              <Icon 
-                name="ic-add" 
-                size={24} 
-                color="textMuted" 
+    <Gradient className="flex-1">
+      {latestEntry?.photo_local_uri ? (
+        <View className="relative px-3 pt-[112px] pb-5">
+          {/* Main Image on Top - Full Width */}
+          <ShadowBox shadowSize="cardLarge" className="w-full relative rounded-xl overflow-hidden" style={{ aspectRatio: 1 }}>
+            <Image
+              source={{ uri: latestEntry.photo_local_uri }}
+              className="w-full h-full "
+              style={{ resizeMode: 'cover' }}
+            />
+          </ShadowBox>
+
+          {/* Play Button and Date/Duration Row */}
+          
+        </View>
+      ) : (
+        <View className="flex-1 justify-center items-center px-6 pt-4">
+          <Text className="text-text-muted dark:text-text-muted-dark">
+            No image available
+          </Text>
+        </View>
+      )}
+
+      <View className="flex-row items-center justify-between px-5 gap-5 mt-5">
+            <ButtonPrimary
+              onPress={playEntry}
+              title={isPlaying ? "Pause" : "Listen"}
+              iconLeft={isPlaying ? "ic-pause.svg" : "ic-play.svg"}
+              size="medium"
+            />
+
+<ButtonIcon
+                onPress={() => {}}
+                icon="ic-tab-saved"
+                size="medium"
+                variant="secondary"
               />
-              <Text 
-                className="text-center text-text-muted dark:text-text-muted-dark"
-                style={{ 
-                  width: 79, 
-                  fontSize: 16
-                }}
-              >
-                Add photo
-              </Text>
+            
+          </View>
+
+      <View className="flex-1 justify-top items-start w-full px-6 pt-4">
+        <View className="flex-col items-left">
+        {latestEntry?.prompt && (
+          <Text className="font-sans-semibold text-xl text-text-brand dark:text-text-brand-dark mb-1">
+            {latestEntry.prompt}
+          </Text>
+        )}
+        </View>
+        <View className="flex-col items-left">
+        {latestEntry?.transcript && (
+          <Text className="font-serif-medium text-2xl text-text-primary dark:text-text-primary-dark mb-3">
+            {latestEntry.transcript}
+          </Text>
+        )}
+        </View>
+        <View className="flex-row items-center gap-2">
+              {latestEntry?.created_at && (
+                <>
+                  <Text className="text-base text-text-muted dark:text-text-muted-dark">
+                    {formatDateWithOrdinal(new Date(latestEntry.created_at))}
+                  </Text>
+                  <View className="w-1 h-1 rounded-full bg-text-muted dark:bg-text-muted-dark" />
+                </>
+              )}
+              {latestEntry?.duration_seconds && (
+                <Text className="text-base text-text-muted dark:text-text-muted-dark">
+                  {Math.round(latestEntry.duration_seconds)}s
+                </Text>
+              )}
             </View>
-          </Gradient>
-        </Gradient>
-      </ShadowBox>
-    </View>
+      </View>
+    </Gradient>
   );
 }

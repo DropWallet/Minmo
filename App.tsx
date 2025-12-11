@@ -12,6 +12,7 @@ import TimelineStack from './src/navigation/TimelineStack';
 import SavedStack from './src/navigation/SavedStack';
 import RecordScreen from './src/screens/RecordScreen';
 import SettingsStack from './src/navigation/SettingsStack';
+import { Icon } from './src/components/Icon';
 
 // Storage initialization
 import { ensureDirectories } from './src/utils/storage';
@@ -128,6 +129,9 @@ export default function App() {
               component={TimelineStack}
               options={{
                 tabBarLabel: 'Timeline',
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="ic-tab-feed" size={size} color={color} />
+                ),
               }}
             />
             <Tab.Screen
@@ -135,6 +139,9 @@ export default function App() {
               component={RecordScreen}
               options={{
                 tabBarLabel: 'Record',
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="ic-tab-record" size={size} color={color} />
+                ),
               }}
             />
             <Tab.Screen
@@ -142,6 +149,9 @@ export default function App() {
               component={SavedStack}
               options={{
                 tabBarLabel: 'Saved',
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="ic-tab-saved" size={size} color={color} />
+                ),
               }}
             />
             <Tab.Screen
@@ -149,6 +159,9 @@ export default function App() {
               component={SettingsStack}
               options={{
                 tabBarLabel: 'Settings',
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="ic-tab-profile" size={size} color={color} />
+                ),
               }}
             />
           </Tab.Navigator>
