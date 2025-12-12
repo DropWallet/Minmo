@@ -13,7 +13,7 @@ const semanticTheme = {
     surface: tailwindColors.slate[50],        // Light: #f8fafc
     'surface-dark': tailwindColors.slate[950],  // Dark: #0f172a
     'surface-strong': tailwindColors.slate[200], // Light: #f1f5f9
-    'surface-strong-dark': tailwindColors.slate[950],  // Dark: #020617
+    'surface-strong-dark': tailwindColors.slate[900],  // Dark: #020617
     'surface-mid': tailwindColors.stone[300], // Light: #e4e4e7
     'surface-mid-dark': tailwindColors.slate[800],  // Dark: #27272a
     'surface-brand-weak': tailwindColors.teal[100],
@@ -28,13 +28,13 @@ const semanticTheme = {
     'surface-trans-full-dark': 'rgba(255, 255, 255, 0)', // Dark: fully transparent white
     
     // Button colors - Light mode defaults with dark mode variants
-    'button-primary': tailwindColors.teal[200],
+    'button-primary': tailwindColors.teal[300],
     'button-primary-dark': tailwindColors.teal[300],
     'button-strong': tailwindColors.teal[400],
     'button-strong-dark': tailwindColors.teal[600],
-    'button-secondary': 'rgba(0, 0, 0, 0.1)',
-    'button-secondary-dark': 'rgba(255, 255, 255, 0.10)',
-    'button-secondary-icon': 'rgba(0, 0, 0, 0.6)',
+    'button-secondary': 'rgba(0, 0, 0, 0.08)',
+    'button-secondary-dark': 'rgba(255, 255, 255, 0.1)',
+    'button-secondary-icon': 'rgba(0, 0, 0, 0.8)',
     'button-secondary-icon-dark': 'rgba(255, 255, 255, 0.6)',
     'button-secondary-strong': tailwindColors.lime[800],
     'button-secondary-strong-dark': tailwindColors.lime[700],

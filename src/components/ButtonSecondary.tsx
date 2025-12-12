@@ -64,7 +64,7 @@ export function ButtonSecondary({
             style={{ marginRight: 8 }} 
           />
         )}
-        <Text className={`${currentSize.textSize} text-button-secondary-icon dark:text-button-secondary-icon-dark font-medium`}>
+        <Text className={`${currentSize.textSize} font-sans-medium text-button-secondary-icon dark:text-button-secondary-icon-dark font-medium`}>
           {title}
         </Text>
       </View>

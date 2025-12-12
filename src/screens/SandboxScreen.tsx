@@ -72,7 +72,7 @@ export default function SandboxScreen() {
   return (
     <Gradient className="flex-1">
       {latestEntry?.photo_local_uri ? (
-        <View className="relative px-3 pt-[112px] pb-5">
+        <View className="relative px-3 pt-[108px] pb-1">
           {/* Main Image on Top - Full Width */}
           <ShadowBox shadowSize="cardLarge" className="w-full relative rounded-xl overflow-hidden" style={{ aspectRatio: 1 }}>
             <Image
@@ -113,7 +113,7 @@ export default function SandboxScreen() {
       <View className="flex-1 justify-top items-start w-full px-6 pt-4">
         <View className="flex-col items-left">
         {latestEntry?.prompt && (
-          <Text className="font-sans-semibold text-xl text-text-brand dark:text-text-brand-dark mb-1">
+          <Text className="font-sans-semibold text-lg text-text-brand dark:text-text-brand-dark mb-1">
             {latestEntry.prompt}
           </Text>
         )}
@@ -128,14 +128,14 @@ export default function SandboxScreen() {
         <View className="flex-row items-center gap-2">
               {latestEntry?.created_at && (
                 <>
-                  <Text className="text-base text-text-muted dark:text-text-muted-dark">
+                  <Text className="font-sans-medium text-text-muted dark:text-text-muted-dark">
                     {formatDateWithOrdinal(new Date(latestEntry.created_at))}
                   </Text>
                   <View className="w-1 h-1 rounded-full bg-text-muted dark:bg-text-muted-dark" />
                 </>
               )}
               {latestEntry?.duration_seconds && (
-                <Text className="text-base text-text-muted dark:text-text-muted-dark">
+                <Text className="font-sans-medium text-text-muted dark:text-text-muted-dark">
                   {Math.round(latestEntry.duration_seconds)}s
                 </Text>
               )}

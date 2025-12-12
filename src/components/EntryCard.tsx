@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Animated, ScrollView, Image, Dimensions } from 'react-native';
+import { View, Text, Animated, ScrollView, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
@@ -11,10 +11,13 @@ interface EntryCardProps {
   entry: Entry;
   onEdit?: () => void;
   onDelete?: () => void;
+  onPress?: () => void; // For navigation in list mode
+  onBookmark?: () => void; // For bookmark functionality
+  listMode?: boolean; // When true, adjusts styling for list use
   sharedElementId?: string; // For shared element transitions
 }
 
-export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedElementId }: EntryCardProps) {
+export function EntryCard({ entry, onEdit, onDelete, onPress, onBookmark, listMode = false, sharedElementId: _sharedElementId }: EntryCardProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
@@ -282,14 +285,15 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedEle
   const entryDate = new Date(entry.recorded_at);
   const formattedDate = formatDateWithOrdinal(entryDate);
 
-  return (
+  const cardContent = (
     <Animated.View 
-      className="flex-1 flex-col justify-center"
+      className={listMode ? "flex-col justify-center mb-4" : "flex-1 flex-col justify-center"}
       style={{
         paddingHorizontal: paddingAnim.interpolate({
           inputRange: [0, 1],
           outputRange: [0, 24],
         }),
+        ...(listMode ? { minHeight: 400 } : {}),
       }}
     >
       <Animated.View
@@ -366,11 +370,11 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedEle
                   overflow: 'hidden',
                 }}
               >
-                <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
+                <Text className="text-sm font-sans-semibold text-text-muted dark:text-text-muted-dark">
                   {formattedDate}
                 </Text>
                 <View className="w-1 h-1 rounded-full bg-text-muted dark:text-text-muted-dark" />
-                <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
+                <Text className="text-sm font-sans-semibold text-text-muted dark:text-text-muted-dark">
                   {formatDurationShort(entry.duration_seconds || 0)}
                 </Text>
               </Animated.View>
@@ -395,7 +399,15 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedEle
                   iconLeft={isPlaying ? "ic-pause.svg" : "ic-play.svg"}
                   size="medium"
                 />
-                {(onEdit || onDelete) && (
+                {onBookmark ? (
+                  <ButtonIcon
+                    onPress={onBookmark}
+                    icon="ic-tab-saved"
+                    size="medium"
+                    variant={entry.favourite ? 'primary' : 'secondary'}
+                    iconColor={entry.favourite ? 'textButtonPrimary' : undefined}
+                  />
+                ) : (onEdit || onDelete) && (
                   <Animated.View 
                     className="flex-row gap-4"
                     style={{
@@ -515,5 +527,15 @@ export function EntryCard({ entry, onEdit, onDelete, sharedElementId: _sharedEle
       </Animated.View>
     </Animated.View>
   );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
+        {cardContent}
+      </TouchableOpacity>
+    );
+  }
+
+  return cardContent;
 }
 
