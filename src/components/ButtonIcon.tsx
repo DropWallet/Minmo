@@ -9,6 +9,7 @@ interface ButtonIconProps {
   variant?: 'secondary' | 'primary';
   className?: string;
   activeOpacity?: number;
+  iconColor?: string; // Optional custom icon color (theme key or hex)
 }
 
 export function ButtonIcon({ 
@@ -17,7 +18,8 @@ export function ButtonIcon({
   size = 'medium',
   variant = 'secondary',
   className = '',
-  activeOpacity = 0.9
+  activeOpacity = 0.9,
+  iconColor
 }: ButtonIconProps) {
   // Size-based styles - width and height must match
   const sizeStyles = {
@@ -53,7 +55,7 @@ export function ButtonIcon({
         className={`rounded-full items-center justify-center ${
           variant === 'primary' 
             ? 'bg-button-primary dark:bg-button-primary-dark' 
-            : 'bg-button-secondary border-2 border-border-subtle dark:bg-button-secondary-dark'
+            : 'bg-button-secondary dark:bg-button-secondary-dark'
         }`}
         style={{ 
           width: currentSize.width,
@@ -64,7 +66,7 @@ export function ButtonIcon({
         <Icon 
           name={icon} 
           size={currentSize.iconSize} 
-          color={variant === 'primary' ? 'textButtonPrimary' : 'textMuted'} 
+          color={iconColor || (variant === 'primary' ? 'textButtonPrimary' : 'textMuted')} 
         />
       </View>
     </TouchableOpacity>

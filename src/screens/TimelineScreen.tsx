@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Image, ScrollView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Image, ScrollView, Alert } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
-import { getEntries, searchEntries } from '@db/queries';
+import { getEntries, searchEntries, updateEntry } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
 import { ButtonIcon } from '@components/ButtonIcon';
+import { EntryCard } from '@components/EntryCard';
+import { Toast } from '@components/Toast';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import Gradient from '@components/Gradient';
 
@@ -21,6 +23,7 @@ export default function TimelineScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [playingEntryId, setPlayingEntryId] = useState<string | null>(null);
   const [sounds, setSounds] = useState<{ [key: string]: Audio.Sound }>({});
+  const [showToast, setShowToast] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const searchQueryRef = useRef<string>(''); // Store current query to avoid closure issues
   const hasInitialLoadRef = useRef(false); // Track if we've done the initial load
@@ -115,7 +118,7 @@ export default function TimelineScreen() {
 
   const handleEntryPress = (entryId: string) => {
     // @ts-expect-error - navigation type doesn't include nested stack screens
-    navigation.navigate('EntryDetail', { entryId });
+    navigation.navigate('EntryImageDetail', { entryId });
   };
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -207,7 +210,7 @@ export default function TimelineScreen() {
 
             {/* Prompt and Transcript */}
             <View className="flex-col gap-0.5 self-stretch">
-              <Text className="text-base font-semibold text-text-brand dark:text-text-brand-dark"
+              <Text className="text-base font-sans-semibold text-text-brand dark:text-text-brand-dark"
               numberOfLines={1}
               ellipsizeMode="tail">
                 {item.prompt || 'Untitled Moment'}
@@ -226,12 +229,12 @@ export default function TimelineScreen() {
             {/* Bottom Row: Date/Duration and Play Button */}
             <View className="flex-row justify-between items-center self-stretch">
               <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
+                <Text className="text-sm font-sans-semibold text-text-muted dark:text-text-muted-dark">
                   {formattedDate}
                 </Text>
-                <View className="w-1.5 h-1.5 rounded-full bg-text-muted dark:bg-text-muted-dark" />
+                <View className="w-1 h-1 rounded-full bg-text-muted dark:bg-text-muted-dark" />
                 {durationText && (
-                  <Text className="text-sm font-semibold text-text-muted dark:text-text-muted-dark">
+                  <Text className="text-sm font-sans-semibold text-text-muted dark:text-text-muted-dark">
                     {durationText}
                   </Text>
                 )}
@@ -260,12 +263,39 @@ export default function TimelineScreen() {
     </View>
   );
 
+  const handleBookmark = async (entry: Entry) => {
+    try {
+      const updated = await updateEntry(entry.id, {
+        favourite: !entry.favourite,
+      });
+      if (updated) {
+        // Update the entry in the entries array
+        setEntries(prev => prev.map(e => e.id === entry.id ? updated : e));
+        // Only show toast when saving (not when unsaving)
+        if (!entry.favourite) {
+          setShowToast(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving to favourites:', error);
+      Alert.alert('Error', 'Failed to save entry. Please try again.');
+    }
+  };
+
   const renderCardView = () => (
-    <View className="flex-1 items-center justify-center px-4">
-      <Text className="text-text-muted dark:text-text-muted-dark text-center">
-        Card view coming soon
-      </Text>
-    </View>
+    <FlatList
+      data={entries}
+      renderItem={({ item }) => (
+        <EntryCard
+          entry={item}
+          onPress={() => handleEntryPress(item.id)}
+          onBookmark={() => handleBookmark(item)}
+          listMode={true}
+        />
+      )}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.list}
+    />
   );
 
   if (loading && entries.length === 0) {
@@ -288,7 +318,7 @@ export default function TimelineScreen() {
             onChangeText={setSearchQuery}
             placeholder="Search prompts and transcripts..."
             placeholderTextColor={colors.textMuted}
-            className="flex-1 text-text-primary dark:text-text-primary-dark text-base"
+            className="flex-1 font-sans-medium text-text-primary dark:text-text-primary-dark text-base"
             style={[styles.searchInput, { color: colors.textPrimary }]}
             autoCapitalize="none"
             autoCorrect={false}
@@ -317,7 +347,7 @@ export default function TimelineScreen() {
                 <Text className={`mr-2 ${viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>⊞</Text>
                 <Text className={`${
                   viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-medium`}>Grid</Text>
+                } text-sm font-sans-medium`}>Grid</Text>
               </View>
             </TouchableOpacity>
 
@@ -333,7 +363,7 @@ export default function TimelineScreen() {
                 <Text className={`mr-2 ${viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>☰</Text>
                 <Text className={`${
                   viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-medium`}>List</Text>
+                } text-sm font-sans-medium`}>List</Text>
               </View>
             </TouchableOpacity>
 
@@ -349,7 +379,7 @@ export default function TimelineScreen() {
                 <Text className={`mr-2 ${viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>▦</Text>
                 <Text className={`${
                   viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-medium`}>Card</Text>
+                } text-sm font-sans-medium`}>Card</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -382,6 +412,13 @@ export default function TimelineScreen() {
           {viewMode === 'card' && renderCardView()}
         </>
       )}
+
+      <Toast
+        visible={showToast}
+        message="Moment saved!"
+        duration={2000}
+        onHide={() => setShowToast(false)}
+      />
     </Gradient>
   );
 }

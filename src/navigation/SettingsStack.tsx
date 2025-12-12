@@ -26,7 +26,20 @@ export default function SettingsStack() {
       <Stack.Screen 
         name="Sandbox" 
         component={SandboxScreen}
-        options={{ headerShown: false }}
+        options={({ route: _route }) => ({
+          headerShown: false,
+          headerTransparent: true,
+          headerTitle: 'Toolbar',
+          headerStyle: {
+            backgroundColor: colors.surfaceTransFull,
+          },
+          headerTintColor: colors.textPrimary,
+          headerTitleStyle: {
+            fontWeight: '600',
+            fontSize: 18,
+          },
+          headerBlurEffect: 'light', // iOS blur effect
+        })}
       />
       <Stack.Screen 
         name="Sandbox2" 

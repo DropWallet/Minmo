@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { Icon } from '@components/Icon';
 
-interface ButtonPrimaryProps {
+interface ButtonDangerProps {
   onPress: () => void;
   title: string;
   size?: 'small' | 'medium' | 'large'; // For future use
@@ -12,7 +12,7 @@ interface ButtonPrimaryProps {
   disabled?: boolean;
 }
 
-export function ButtonPrimary({ 
+export function ButtonDanger({ 
   onPress, 
   title, 
   size = 'medium',
@@ -20,8 +20,8 @@ export function ButtonPrimary({
   activeOpacity = 0.9,
   iconLeft,
   disabled = false
-}: ButtonPrimaryProps) {
-  // Size-based styles (matching ButtonSecondary)
+}: ButtonDangerProps) {
+  // Size-based styles (matching ButtonPrimary and ButtonSecondary)
   const sizeStyles = {
     small: {
       paddingVertical: 8,
@@ -53,7 +53,7 @@ export function ButtonPrimary({
       disabled={disabled}
     >
       <View 
-        className={`bg-button-primary dark:bg-button-primary-dark flex-row justify-center rounded-full overflow-hidden items-center ${disabled ? 'opacity-60' : ''}`}
+        className={`bg-button-stop dark:bg-button-stop-dark flex-row justify-center rounded-full overflow-hidden items-center ${disabled ? 'opacity-60' : ''}`}
         style={{ 
           paddingVertical: currentSize.paddingVertical,
           paddingHorizontal: currentSize.paddingHorizontal,
@@ -63,15 +63,14 @@ export function ButtonPrimary({
           <Icon 
             name={iconLeft} 
             size={currentSize.iconSize} 
-            color="textButtonPrimary" 
+            color="textButtonStop" 
             style={{ marginRight: 8 }} 
           />
         )}
-        <Text className={`${currentSize.textSize} font-sans-semibold text-text-button-primary dark:text-text-button-primary-dark font-semibold`}>
+        <Text className={`${currentSize.textSize} font-sans-semibold text-text-button-stop dark:text-text-button-stop-dark font-semibold`}>
           {title}
         </Text>
       </View>
     </TouchableOpacity>
   );
 }
-
