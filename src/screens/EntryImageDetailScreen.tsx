@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, Image, Alert, ActivityIndicator, Animated, ScrollView, Dimensions } from 'react-native';
+import { View, Text, Alert, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
+import { Animated as RNAnimated } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
@@ -39,7 +41,7 @@ export default function EntryImageDetailScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTranscriptModal, setShowTranscriptModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const wordAnimations = useRef<{ [key: number]: Animated.Value }>({});
+  const wordAnimations = useRef<{ [key: number]: RNAnimated.Value }>({});
   const wordPositions = useRef<{ [key: number]: number }>({});
   const captionScrollViewRef = useRef<ScrollView | null>(null);
   const promptHeightRef = useRef<number>(0);
@@ -52,8 +54,8 @@ export default function EntryImageDetailScreen() {
   const screenHeight = Dimensions.get('window').height;
 
   // Animation values
-  const promptOpacityAnim = useRef(new Animated.Value(1)).current;
-  const transcriptTranslateAnim = useRef(new Animated.Value(0)).current;
+  const promptOpacityAnim = useRef(new RNAnimated.Value(1)).current;
+  const transcriptTranslateAnim = useRef(new RNAnimated.Value(0)).current;
   const ANIMATION_DURATION = 300;
   const TRANSLATE_OFFSET = 20; // Manual adjustment to prevent clipping
 
@@ -105,7 +107,7 @@ export default function EntryImageDetailScreen() {
       setWords(transcriptWords);
       transcriptWords.forEach((_, index) => {
         if (!wordAnimations.current[index]) {
-          wordAnimations.current[index] = new Animated.Value(1);
+          wordAnimations.current[index] = new RNAnimated.Value(1);
         }
       });
     }
@@ -114,7 +116,7 @@ export default function EntryImageDetailScreen() {
   // Animate word highlighting
   useEffect(() => {
     if (currentWordIndex >= 0 && currentWordIndex < words.length) {
-      Animated.spring(wordAnimations.current[currentWordIndex] || new Animated.Value(1), {
+      RNAnimated.spring(wordAnimations.current[currentWordIndex] || new RNAnimated.Value(1), {
         toValue: 1.05,
         tension: 300,
         friction: 20,
@@ -122,7 +124,7 @@ export default function EntryImageDetailScreen() {
       }).start();
 
       if (currentWordIndex > 0) {
-        Animated.spring(wordAnimations.current[currentWordIndex - 1] || new Animated.Value(1), {
+        RNAnimated.spring(wordAnimations.current[currentWordIndex - 1] || new RNAnimated.Value(1), {
           toValue: 1,
           tension: 300,
           friction: 20,
@@ -166,26 +168,26 @@ export default function EntryImageDetailScreen() {
     }
     
     if (isPlaying) {
-      Animated.parallel([
-        Animated.timing(promptOpacityAnim, {
+      RNAnimated.parallel([
+        RNAnimated.timing(promptOpacityAnim, {
           toValue: 0,
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }),
-        Animated.timing(transcriptTranslateAnim, {
+        RNAnimated.timing(transcriptTranslateAnim, {
           toValue: -(promptAndDateHeightRef.current - TRANSLATE_OFFSET),
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
-      Animated.parallel([
-        Animated.timing(promptOpacityAnim, {
+      RNAnimated.parallel([
+        RNAnimated.timing(promptOpacityAnim, {
           toValue: 1,
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }),
-        Animated.timing(transcriptTranslateAnim, {
+        RNAnimated.timing(transcriptTranslateAnim, {
           toValue: 0,
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
@@ -554,10 +556,12 @@ export default function EntryImageDetailScreen() {
         <View className="relative px-3 pt-[108px] pb-1">
           {/* Main Image on Top - Full Width */}
           <ShadowBox shadowSize="cardLarge" className="w-full relative rounded-xl overflow-hidden" style={{ aspectRatio: 1 }}>
-            <Image
+            <Animated.Image
               source={{ uri: entry.photo_local_uri }}
               className="w-full h-full "
               style={{ resizeMode: 'cover' }}
+              // @ts-ignore - sharedTransitionTag is supported in Reanimated v4 but types may not be updated
+              sharedTransitionTag={`image-${entry.id}`}
             />
           </ShadowBox>
 
@@ -599,7 +603,7 @@ export default function EntryImageDetailScreen() {
 
       <View className="flex-1 justify-top items-start w-full px-6 pt-4">
         {/* Prompt Text - Fades out when playing */}
-        <Animated.View 
+        <RNAnimated.View 
           className="flex-col items-left"
           style={{
             opacity: promptOpacityAnim,
@@ -619,10 +623,10 @@ export default function EntryImageDetailScreen() {
               {entry.prompt}
             </Text>
           )}
-        </Animated.View>
+        </RNAnimated.View>
 
         {/* Transcript - Animates up and shows word-by-word when playing */}
-        <Animated.View
+        <RNAnimated.View
           className="flex-col items-left"
           style={{
             transform: [
@@ -648,7 +652,7 @@ export default function EntryImageDetailScreen() {
                   const animValue = wordAnimations.current[index] || new Animated.Value(1);
                   
                   return (
-                    <Animated.View
+                    <RNAnimated.View
                       key={index}
                       onLayout={(event) => {
                         const { y } = event.nativeEvent.layout;
@@ -669,7 +673,7 @@ export default function EntryImageDetailScreen() {
                       >
                         {word}
                       </Text>
-                    </Animated.View>
+                    </RNAnimated.View>
                   );
                 })}
               </View>
@@ -681,10 +685,10 @@ export default function EntryImageDetailScreen() {
               </Text>
             )
           )}
-        </Animated.View>
+        </RNAnimated.View>
 
         {/* Date/Duration - Fades out when playing */}
-        <Animated.View 
+        <RNAnimated.View 
           className="flex-row items-center gap-2"
           style={{
             opacity: promptOpacityAnim,
@@ -712,7 +716,7 @@ export default function EntryImageDetailScreen() {
               {Math.round(entry.duration_seconds)}s
             </Text>
           )}
-        </Animated.View>
+        </RNAnimated.View>
       </View>
 
       <EntryEditModal

@@ -720,21 +720,30 @@ export async function searchEntries(query: string, retries = 0): Promise<Entry[]
     // This ensures exact matches (e.g., "moment") rank higher than prefix matches (e.g., "moment*")
     const formatFTS5Query = (q: string): string => {
       const trimmed = q.trim();
+      // Escape special FTS5 characters
+      const escapeFTS5 = (text: string): string => {
+        // FTS5 special characters: ", ', \, and control characters
+        return text.replace(/"/g, '""').replace(/'/g, "''");
+      };
+      
       // For single word: exact match OR prefix match
       // For multi-word: exact phrase OR each word as prefix
       if (trimmed.split(/\s+/).length === 1) {
-        // Single word: "moment" OR moment*
-        return `"${trimmed}" OR ${trimmed}*`;
+        // Single word: ("word" OR word*)
+        const escaped = escapeFTS5(trimmed);
+        return `("${escaped}" OR ${escaped}*)`;
       } else {
-        // Multi-word: exact phrase OR prefix for each word
-        const words = trimmed.split(/\s+/);
-        const exactPhrase = `"${trimmed}"`;
+        // Multi-word: ("exact phrase" OR word1* word2*)
+        const escaped = escapeFTS5(trimmed);
+        const words = trimmed.split(/\s+/).map(w => escapeFTS5(w));
+        const exactPhrase = `"${escaped}"`;
         const prefixQuery = words.map(w => `${w}*`).join(' ');
-        return `${exactPhrase} OR ${prefixQuery}`;
+        return `(${exactPhrase} OR ${prefixQuery})`;
       }
     };
 
     const fts5Query = formatFTS5Query(query);
+    console.log('[Search] FTS5 query:', fts5Query);
 
     // Try FTS5 first, fallback to LIKE if not available
     try {
@@ -752,13 +761,23 @@ export async function searchEntries(query: string, retries = 0): Promise<Entry[]
          LIMIT 50`,
         [fts5Query]
       );
+      console.log('[Search] FTS5 results:', results?.length || 0);
+      
+      // If FTS5 returns 0 results, fall back to LIKE search
+      // This handles cases where FTS5 index is empty or stale
+      if (!results || results.length === 0) {
+        console.log('[Search] FTS5 returned 0 results, falling back to LIKE');
+        throw new Error('FTS5 returned 0 results');
+      }
+      
       // Remove rank property before returning (it's not part of Entry type)
       return (results || []).map(({ rank: _rank, ...entry }) => entry);
     } catch (error) {
+      console.log('[Search] FTS5 failed, falling back to LIKE:', error);
       // Fallback to LIKE search with simple scoring
       // Prompt matches rank higher (1) than transcript matches (2)
-      const searchTerm = `%${query}%`;
-      const lowerQuery = query.toLowerCase();
+      const lowerQuery = query.toLowerCase().trim();
+      const searchTerm = `%${lowerQuery}%`;
       const results = await db.getAllAsync<Entry & { match_rank?: number }>(
         `SELECT *,
          CASE 
@@ -767,11 +786,12 @@ export async function searchEntries(query: string, retries = 0): Promise<Entry[]
            ELSE 3
          END as match_rank
          FROM entries
-         WHERE prompt LIKE ? OR transcript LIKE ?
+         WHERE LOWER(prompt) LIKE ? OR LOWER(transcript) LIKE ?
          ORDER BY match_rank ASC, created_at DESC
          LIMIT 50`,
-        [`%${lowerQuery}%`, `%${lowerQuery}%`, searchTerm, searchTerm]
+        [searchTerm, searchTerm, searchTerm, searchTerm]
       );
+      console.log('[Search] LIKE results:', results?.length || 0);
       // Remove match_rank property before returning
       return (results || []).map(({ match_rank: _match_rank, ...entry }) => entry);
     }
@@ -790,6 +810,88 @@ export async function searchEntries(query: string, retries = 0): Promise<Entry[]
     }
     
     return [];
+  }
+}
+
+/**
+ * Get entries grouped by date for calendar view
+ * Returns a Map where key is "YYYY-MM-DD" and value is the entry for that day
+ * 
+ * @param startDate - Start date (inclusive)
+ * @param endDate - End date (inclusive)
+ * @param retries - Internal retry counter (default: 0, used for automatic retries on failure)
+ * @returns Promise resolving to a Map<string, Entry> where key is date string "YYYY-MM-DD"
+ */
+export async function getEntriesByDateRange(
+  startDate: Date,
+  endDate: Date,
+  retries = 0
+): Promise<Map<string, Entry>> {
+  try {
+    // Reset instance if we're retrying
+    if (retries > 0) {
+      dbInstance = null;
+      initializingPromise = null;
+      await new Promise(resolve => setTimeout(resolve, 200 * retries));
+    }
+
+    const db = await getDb();
+    
+    // Convert dates to timestamps (start of day and end of day)
+    const startTimestamp = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate()
+    ).getTime();
+    
+    const endTimestamp = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate(),
+      23,
+      59,
+      59,
+      999
+    ).getTime();
+
+    const results = await db.getAllAsync<Entry>(
+      `SELECT * FROM entries 
+       WHERE recorded_at >= ? AND recorded_at <= ?
+       ORDER BY recorded_at DESC`,
+      [startTimestamp, endTimestamp]
+    );
+
+    // Group by date (YYYY-MM-DD) - since we only allow 1 entry per day, 
+    // we'll take the most recent entry if there are duplicates
+    const entriesByDate = new Map<string, Entry>();
+    
+    for (const entry of results) {
+      const entryDate = new Date(entry.recorded_at);
+      const dateKey = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}-${String(entryDate.getDate()).padStart(2, '0')}`;
+      
+      // Only store if we don't have an entry for this date yet
+      // (or if this entry is more recent - though shouldn't happen with 1 per day)
+      if (!entriesByDate.has(dateKey)) {
+        entriesByDate.set(dateKey, entry);
+      }
+    }
+
+    return entriesByDate;
+  } catch (error) {
+    console.error('Error in getEntriesByDateRange:', error);
+    
+    // Retry on database errors
+    if (retries < 2 && error instanceof Error && (
+      error.message.includes('NullPointerException') || 
+      error.message.includes('prepareAsync') || 
+      error.message.includes('execAsync')
+    )) {
+      dbInstance = null;
+      initializingPromise = null;
+      return getEntriesByDateRange(startDate, endDate, retries + 1);
+    }
+    
+    return new Map();
   }
 }
 

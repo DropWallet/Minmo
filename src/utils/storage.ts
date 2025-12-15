@@ -1,7 +1,10 @@
 import { File, Directory, Paths } from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const audioDir = new Directory(Paths.document, 'audio');
 const photoDir = new Directory(Paths.document, 'photos');
+
+const APP_INSTALL_DATE_KEY = 'app_install_date';
 
 export async function ensureDirectories() {
   try {
@@ -71,6 +74,31 @@ export async function deleteFile(uri: string): Promise<void> {
   } catch (error) {
     console.error('Error deleting file:', error);
     throw error;
+  }
+}
+
+/**
+ * Get or set the app install date
+ * Returns the install date as a timestamp (number)
+ * If not set, initializes it to the current date and returns it
+ */
+export async function getAppInstallDate(): Promise<number> {
+  try {
+    const stored = await AsyncStorage.getItem(APP_INSTALL_DATE_KEY);
+    if (stored) {
+      return parseInt(stored, 10);
+    }
+    
+    // First time - set install date to today (start of day)
+    const now = new Date();
+    const installDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    await AsyncStorage.setItem(APP_INSTALL_DATE_KEY, installDate.toString());
+    return installDate;
+  } catch (error) {
+    console.error('Error getting app install date:', error);
+    // Fallback to current date if storage fails
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   }
 }
 

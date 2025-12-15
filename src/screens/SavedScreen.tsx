@@ -1,15 +1,15 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
-import { getFavouriteEntries } from '@db/queries';
-import { ShadowBox } from '@components/ShadowBox';
-import { ButtonPrimary } from '@components/ButtonPrimary';
-import { formatDateWithOrdinal } from '@utils/dateFormat';
+import { getFavouriteEntries, updateEntry } from '@db/queries';
+import { ViewModeButtons } from '@components/ViewModeButtons';
+import { ListEntryCard } from '@components/ListEntryCard';
+import { TimelineEntryCard } from '@components/TimelineEntryCard';
 import Gradient from '@components/Gradient';
 
-type ViewMode = 'list' | 'grid' | 'card';
+type ViewMode = 'list' | 'card';
 
 export default function SavedScreen() {
   const navigation = useNavigation();
@@ -43,7 +43,7 @@ export default function SavedScreen() {
 
   const handleEntryPress = (entryId: string) => {
     // @ts-expect-error - navigation type doesn't include nested stack screens
-    navigation.navigate('EntryDetail', { entryId });
+    navigation.navigate('EntryImageDetail', { entryId });
   };
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -102,76 +102,47 @@ export default function SavedScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderEntry = ({ item }: { item: Entry }) => {
-    const entryDate = new Date(item.created_at);
-    const formattedDate = formatDateWithOrdinal(entryDate);
-    const durationText = item.duration_seconds ? `${Math.round(item.duration_seconds)}s` : '';
-    const isPlaying = playingEntryId === item.id;
-    
-    return (
-      <TouchableOpacity
-        onPress={() => handleEntryPress(item.id)}
-        activeOpacity={0.9}
-        className="mb-4"
-      >
-        <View className="bg-surface dark:bg-surface-dark rounded-2xl p-1.5">
-          <View className="flex-col gap-0.5">
-            <View className="flex-row items-start self-stretch">
-              {item.photo_local_uri ? (
-                <ShadowBox shadowSize="cardSmall" className="w-[74px] h-[74px] rounded-lg overflow-hidden">
-                  <Image
-                    source={{ uri: item.photo_local_uri }}
-                    className="w-full h-full"
-                    style={{ resizeMode: 'cover' }}
-                  />
-                </ShadowBox>
-              ) : null}
-              <View className="flex-col items-start gap-0.5 flex-1 pt-3">
-                <Text className="text-xs font-semibold text-text-muted dark:text-text-muted-dark pl-2">
-                  {formattedDate}
-                </Text>
-                <Text className="text-2xl font-serif-semibold tracking-tighter leading-tight text-text-primary dark:text-text-primary-dark self-stretch pl-2">
-                  {item.prompt || 'Untitled Moment'}
-                </Text>
-              </View>
-            </View>
+  const handleBookmark = async (entry: Entry) => {
+    try {
+      const updated = await updateEntry(entry.id, {
+        favourite: !entry.favourite,
+      });
+      if (updated) {
+        // Remove from list immediately if unbookmarked
+        if (!updated.favourite) {
+          setEntries(prev => prev.filter(e => e.id !== entry.id));
+        } else {
+          // Update the entry in the list if bookmarked
+          setEntries(prev => prev.map(e => e.id === entry.id ? updated : e));
+        }
+      }
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+    }
+  };
 
-            <View className="flex-row items-center justify-start gap-2.5 px-2 py-2 self-stretch">
-              <ButtonPrimary
-                onPress={() => {
-                  playEntry(item);
-                }}
-                title={isPlaying ? "Pause" : "Listen"}
-                iconLeft={isPlaying ? "ic-pause.svg" : "ic-play.svg"}
-                size="small"
-              />
-              {durationText && (
-                <Text className="flex-1 text-sm font-semibold text-right text-text-muted dark:text-text-muted-dark">
-                  {durationText}
-                </Text>
-              )}
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
+  const renderListEntry = ({ item }: { item: Entry }) => {
+    const isPlaying = playingEntryId === item.id;
+    return (
+      <ListEntryCard
+        entry={item}
+        onPress={() => handleEntryPress(item.id)}
+        onPlay={() => playEntry(item)}
+        isPlaying={isPlaying}
+        onBookmark={() => handleBookmark(item)}
+      />
     );
   };
 
-  const renderGridView = () => (
-    <View className="flex-1 items-center justify-center px-4">
-      <Text className="text-text-muted dark:text-text-muted-dark text-center">
-        Grid view coming soon
-      </Text>
-    </View>
-  );
-
-  const renderCardView = () => (
-    <View className="flex-1 items-center justify-center px-4">
-      <Text className="text-text-muted dark:text-text-muted-dark text-center">
-        Card view coming soon
-      </Text>
-    </View>
-  );
+  const renderCardEntry = ({ item }: { item: Entry }) => {
+    return (
+      <TimelineEntryCard
+        entry={item}
+        onPress={() => handleEntryPress(item.id)}
+        onBookmark={() => handleBookmark(item)}
+      />
+    );
+  };
 
   if (loading && entries.length === 0) {
     return (
@@ -188,57 +159,7 @@ export default function SavedScreen() {
           Saved
         </Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              onPress={() => handleViewModeChange('grid')}
-              className={`px-4 py-2 rounded-full ${
-                viewMode === 'grid'
-                  ? 'bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface dark:bg-surface-dark'
-              }`}
-            >
-              <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>⊞</Text>
-                <Text className={`${
-                  viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-medium`}>Grid</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleViewModeChange('list')}
-              className={`px-4 py-2 rounded-full ${
-                viewMode === 'list'
-                  ? 'bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface dark:bg-surface-dark'
-              }`}
-            >
-              <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>☰</Text>
-                <Text className={`${
-                  viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-medium`}>List</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleViewModeChange('card')}
-              className={`px-4 py-2 rounded-full ${
-                viewMode === 'card'
-                  ? 'bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface dark:bg-surface-dark'
-              }`}
-            >
-              <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>▦</Text>
-                <Text className={`${
-                  viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-medium`}>Card</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        <ViewModeButtons viewMode={viewMode} onViewModeChange={handleViewModeChange} />
       </View>
       
       {loading && entries.length === 0 ? (
@@ -256,13 +177,19 @@ export default function SavedScreen() {
           {viewMode === 'list' && (
             <FlatList
               data={entries}
-              renderItem={renderEntry}
+              renderItem={renderListEntry}
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.list}
             />
           )}
-          {viewMode === 'grid' && renderGridView()}
-          {viewMode === 'card' && renderCardView()}
+          {viewMode === 'card' && (
+            <FlatList
+              data={entries}
+              renderItem={renderCardEntry}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.list}
+            />
+          )}
         </>
       )}
     </Gradient>

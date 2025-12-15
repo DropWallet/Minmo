@@ -14,8 +14,8 @@ const semanticTheme = {
     'surface-dark': tailwindColors.slate[950],  // Dark: #0f172a
     'surface-strong': tailwindColors.slate[200], // Light: #f1f5f9
     'surface-strong-dark': tailwindColors.slate[900],  // Dark: #020617
-    'surface-mid': tailwindColors.stone[300], // Light: #e4e4e7
-    'surface-mid-dark': tailwindColors.slate[800],  // Dark: #27272a
+    'surface-mid': tailwindColors.teal[300], // Light: #e4e4e7
+    'surface-mid-dark': tailwindColors.teal[800],  // Dark: #27272a
     'surface-brand-weak': tailwindColors.teal[100],
     'surface-brand-weak-dark': tailwindColors.teal[900],
     overlay: 'rgba(248,250,252,0.7)',         // Light: slate-50 with opacity
@@ -30,7 +30,7 @@ const semanticTheme = {
     // Button colors - Light mode defaults with dark mode variants
     'button-primary': tailwindColors.teal[300],
     'button-primary-dark': tailwindColors.teal[300],
-    'button-strong': tailwindColors.teal[400],
+    'button-strong': tailwindColors.teal[600],
     'button-strong-dark': tailwindColors.teal[600],
     'button-secondary': 'rgba(0, 0, 0, 0.08)',
     'button-secondary-dark': 'rgba(255, 255, 255, 0.1)',
@@ -52,8 +52,8 @@ const semanticTheme = {
     'text-secondary-dark': tailwindColors.slate[300],  // Dark: #cbd5e1
     'text-muted': tailwindColors.slate[500],       // Light: #64748b
     'text-muted-dark': tailwindColors.slate[400],  // Dark: #94a3b8
-    'text-inverse': tailwindColors.slate[200],     // Light: light text
-    'text-inverse-dark': tailwindColors.slate[900],  // Dark: dark text
+    'text-inverse': tailwindColors.teal[800],     // Light: light text
+    'text-inverse-dark': tailwindColors.teal[800],  // Dark: dark text
     'text-button-primary': tailwindColors.teal[900],  // Light: lime-900
     'text-button-primary-dark': tailwindColors.teal[900],  // Dark: lime-50
     'text-button-stop': tailwindColors.red[900],

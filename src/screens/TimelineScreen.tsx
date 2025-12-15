@@ -6,12 +6,16 @@ import { Entry } from '@db/types';
 import { getEntries, searchEntries, updateEntry } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
 import { ButtonIcon } from '@components/ButtonIcon';
-import { EntryCard } from '@components/EntryCard';
+import { TimelineEntryCard } from '@components/TimelineEntryCard';
 import { Toast } from '@components/Toast';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import Gradient from '@components/Gradient';
+import { Icon } from '@components/Icon';
+import { ViewModeButtons } from '@components/ViewModeButtons';
+import { ListEntryCard } from '@components/ListEntryCard';
+import { CalendarView } from '@components/CalendarView';
 
-type ViewMode = 'list' | 'grid' | 'card';
+type ViewMode = 'list' | 'grid' | 'card'; // grid is calendar view, card is TimelineEntryCard view
 
 export default function TimelineScreen() {
   const navigation = useNavigation();
@@ -183,84 +187,21 @@ export default function TimelineScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderEntry = ({ item }: { item: Entry }) => {
-    const entryDate = new Date(item.created_at);
-    const formattedDate = formatDateWithOrdinal(entryDate);
-    const durationText = item.duration_seconds ? `${Math.round(item.duration_seconds)}s` : '';
+  const renderListEntry = ({ item }: { item: Entry }) => {
     const isPlaying = playingEntryId === item.id;
-    
     return (
-      <TouchableOpacity
+      <ListEntryCard
+        entry={item}
         onPress={() => handleEntryPress(item.id)}
-        activeOpacity={0.9}
-        className="mb-4"
-      >
-        <View className="border-2 border-border-default dark:border-border-default-dark bg-surface-trans dark:bg-surface-trans-dark rounded-2xl p-4">
-          <View className="flex-col gap-4 self-stretch">
-            {/* Image at top */}
-            {item.photo_local_uri && (
-              <View className="w-[88px] h-[88px] rounded-[9.51px] overflow-hidden">
-                <Image
-                  source={{ uri: item.photo_local_uri }}
-                  className="w-full h-full"
-                  style={{ resizeMode: 'cover' }}
-                />
-              </View>
-            )}
-
-            {/* Prompt and Transcript */}
-            <View className="flex-col gap-0.5 self-stretch">
-              <Text className="text-base font-sans-semibold text-text-brand dark:text-text-brand-dark"
-              numberOfLines={1}
-              ellipsizeMode="tail">
-                {item.prompt || 'Untitled Moment'}
-              </Text>
-              {item.transcript && (
-                <Text 
-                  className="text-xl font-serif-medium text-text-primary dark:text-text-secondary-dark"
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {item.transcript}
-                </Text>
-              )}
-            </View>
-
-            {/* Bottom Row: Date/Duration and Play Button */}
-            <View className="flex-row justify-between items-center self-stretch">
-              <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-sans-semibold text-text-muted dark:text-text-muted-dark">
-                  {formattedDate}
-                </Text>
-                <View className="w-1 h-1 rounded-full bg-text-muted dark:bg-text-muted-dark" />
-                {durationText && (
-                  <Text className="text-sm font-sans-semibold text-text-muted dark:text-text-muted-dark">
-                    {durationText}
-                  </Text>
-                )}
-              </View>
-              <ButtonIcon
-                onPress={(e) => {
-                  e?.stopPropagation();
-                  playEntry(item);
-                }}
-                icon={isPlaying ? "ic-pause" : "ic-play-slim"}
-                size="small"
-                variant="primary"
-              />
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
+        onPlay={() => playEntry(item)}
+        isPlaying={isPlaying}
+        onBookmark={() => handleBookmark(item)}
+      />
     );
   };
 
   const renderGridView = () => (
-    <View className="flex-1 items-center justify-center px-4">
-      <Text className="text-text-muted dark:text-text-muted-dark text-center">
-        Grid view coming soon
-      </Text>
-    </View>
+    <CalendarView onEntryPress={handleEntryPress} />
   );
 
   const handleBookmark = async (entry: Entry) => {
@@ -286,11 +227,10 @@ export default function TimelineScreen() {
     <FlatList
       data={entries}
       renderItem={({ item }) => (
-        <EntryCard
+        <TimelineEntryCard
           entry={item}
           onPress={() => handleEntryPress(item.id)}
           onBookmark={() => handleBookmark(item)}
-          listMode={true}
         />
       )}
       keyExtractor={(item) => item.id}
@@ -311,8 +251,8 @@ export default function TimelineScreen() {
       <View className="px-4 py-1">
         
         {/* Search Input */}
-        <View className="flex-row items-center bg-surface-trans dark:bg-surface-trans-dark rounded-full border border-border-subtle dark:border-border-subtle-dark px-3 py-3 mb-4">
-          <Text className="text-text-muted dark:text-text-muted-dark mr-2">🔍</Text>
+        <View className="flex-row items-center bg-surface-trans dark:bg-surface-trans-dark rounded-full border border-border-subtle dark:border-border-subtle-dark pl-3 pr-6 py-3 mb-3">
+          <Icon name="ic-search" size={20} color="textMuted" style={{ marginRight: 8 }} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -327,63 +267,17 @@ export default function TimelineScreen() {
             <ActivityIndicator size="small" color={colors.accent} className="ml-2" />
           ) : searchQuery.length > 0 ? (
             <TouchableOpacity onPress={handleClearSearch} className="ml-2">
-              <Text className="text-text-muted dark:text-text-muted-dark text-lg">✕</Text>
+              <Icon name="ic-close" size={20} color="textMuted" />
             </TouchableOpacity>
           ) : null}
         </View>
 
         {/* View Mode Buttons */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              onPress={() => handleViewModeChange('grid')}
-              className={`px-4 py-2 rounded-full ${
-                viewMode === 'grid'
-                  ? 'border-2 border-border-default dark:border-border-default bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface-trans dark:bg-surface-trans-dark border border-border-subtle dark:border-border-default-dark'
-              }`}
-            >
-              <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>⊞</Text>
-                <Text className={`${
-                  viewMode === 'grid' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-sans-medium`}>Grid</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleViewModeChange('list')}
-              className={`px-4 py-2 rounded-full ${
-                viewMode === 'list'
-                  ? 'border-2 border-border-default dark:border-border-default bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface-trans dark:bg-surface-trans-dark border border-border-subtle dark:border-border-default-dark'
-              }`}
-            >
-              <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>☰</Text>
-                <Text className={`${
-                  viewMode === 'list' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-sans-medium`}>List</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleViewModeChange('card')}
-              className={`px-4 py-2 rounded-full ${
-                viewMode === 'card'
-                  ? 'border-2 border-border-default dark:border-border-default bg-button-primary dark:bg-button-primary-dark'
-                  : 'bg-surface-trans dark:bg-surface-trans-dark border border-border-subtle dark:border-border-default-dark'
-              }`}
-            >
-              <View className="flex-row items-center">
-                <Text className={`mr-2 ${viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'}`}>▦</Text>
-                <Text className={`${
-                  viewMode === 'card' ? 'text-text-button-primary dark:text-text-button-primary-dark' : 'text-text-muted dark:text-text-muted-dark'
-                } text-sm font-sans-medium`}>Card</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        <ViewModeButtons 
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          includeGrid={true}
+        />
       </View>
       
       {loading && entries.length === 0 ? (
@@ -403,7 +297,7 @@ export default function TimelineScreen() {
           {viewMode === 'list' && (
             <FlatList
               data={entries}
-              renderItem={renderEntry}
+              renderItem={renderListEntry}
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.list}
             />
@@ -422,6 +316,7 @@ export default function TimelineScreen() {
     </Gradient>
   );
 }
+
 
 const styles = StyleSheet.create({
   list: {

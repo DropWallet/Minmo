@@ -1,7 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TimelineScreen from '../screens/TimelineScreen';
-import EntryDetailScreen from '../screens/EntryDetailScreen';
 import EntryImageDetailScreen from '../screens/EntryImageDetailScreen';
 import { useTheme } from '../hooks/useTheme';
 
@@ -22,15 +21,6 @@ export default function TimelineStack() {
         name="TimelineMain" 
         component={TimelineScreen}
         options={{ headerShown: false }}
-      />
-      <Stack.Screen 
-        name="EntryDetail" 
-        component={EntryDetailScreen}
-        options={{ 
-          headerShown: false,
-          presentation: 'card',
-          animation: 'default',
-        }}
       />
       <Stack.Screen 
         name="EntryImageDetail" 

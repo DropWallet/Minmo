@@ -149,6 +149,90 @@ const iconPaths: Record<string, { viewBox: string; paths: (color: string) => Rea
       </>
     ),
   },
+  'ic-search': {
+    viewBox: '0 0 24 24',
+    paths: (color) => (
+      <>
+        <Path
+          d="M17 17L21 21"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <Path
+          d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </>
+    ),
+  },
+  'ic-grid': {
+    viewBox: '0 0 16 16',
+    paths: (color) => (
+      <>
+        <Path
+          d="M2.5 2.5L6.5 2.5L6.5 6.5L2.5 6.5Z"
+          stroke={color}
+          strokeWidth={1}
+          fill="none"
+        />
+        <Path
+          d="M2.5 9.5L6.5 9.5L6.5 13.5L2.5 13.5Z"
+          stroke={color}
+          strokeWidth={1}
+          fill="none"
+        />
+        <Path
+          d="M9.5 2.5L13.5 2.5L13.5 6.5L9.5 6.5Z"
+          stroke={color}
+          strokeWidth={1}
+          fill="none"
+        />
+        <Path
+          d="M9.5 9.5L13.5 9.5L13.5 13.5L9.5 13.5Z"
+          stroke={color}
+          strokeWidth={1}
+          fill="none"
+        />
+      </>
+    ),
+  },
+  'ic-list': {
+    viewBox: '0 0 16 16',
+    paths: (color) => (
+      <>
+        <Path
+          d="M2.5 2.5L13.5 2.5L13.5 6.5L2.5 6.5Z"
+          stroke={color}
+          strokeWidth={1}
+          fill="none"
+        />
+        <Path
+          d="M2.5 9.5L13.5 9.5L13.5 13.5L2.5 13.5Z"
+          stroke={color}
+          strokeWidth={1}
+          fill="none"
+        />
+      </>
+    ),
+  },
+  'ic-card': {
+    viewBox: '0 0 16 16',
+    paths: (color) => (
+      <Path
+        d="M3.5 2.5L12.5 2.5L12.5 13.5L3.5 13.5Z"
+        stroke={color}
+        strokeWidth={1}
+        fill="none"
+      />
+    ),
+  },
 };
 
 export function Icon({ name, size = 20, color, style }: IconProps) {
