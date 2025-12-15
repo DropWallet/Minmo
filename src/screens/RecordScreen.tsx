@@ -387,7 +387,7 @@ export default function RecordScreen() {
       ) : (
         <View className="flex-1 justify-center items-center">
           {/* Prompt Section */}
-          <Text className="text-text-brand dark:text-text-brand-dark font-semibold">
+          <Text className="text-text-brand dark:text-text-brand-dark font-sans-semibold">
             {formatDateWithOrdinal(new Date())}
           </Text>
           <Text className="text-4xl text-text-primary dark:text-text-primary-dark font-serif-semibold text-center pt-3 mb-8">
@@ -403,7 +403,7 @@ export default function RecordScreen() {
               >
                 <View className="flex-1 flex-row items-center justify-center bg-button-primary dark:bg-button-primary-dark 
                 border-b-2 border-x-2 border-border-button-primary dark:border-border-button-primary-dark w-full h-full rounded-full overflow-hidden">
-                  <Text className="text-lg text-text-button-primary dark:text-text-button-primary-dark font-semibold">
+                  <Text className="text-lg text-text-button-primary dark:text-text-button-primary-dark font-sans-semibold">
                     Record Moment
                   </Text>
                 </View>
