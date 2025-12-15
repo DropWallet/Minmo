@@ -13,11 +13,6 @@ interface TimelineEntryCardProps {
   onBookmark?: () => void;
 }
 
-const formatDurationShort = (seconds: number): string => {
-  const secs = Math.floor(seconds);
-  return `${secs}s`;
-};
-
 export function TimelineEntryCard({ entry, onPress, onBookmark }: TimelineEntryCardProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -114,7 +109,7 @@ export function TimelineEntryCard({ entry, onPress, onBookmark }: TimelineEntryC
               source={{ uri: entry.photo_local_uri }} 
               className="w-full h-full rounded-lg"
               style={{ resizeMode: 'cover' }}
-              // @ts-ignore - sharedTransitionTag is supported in Reanimated v4 but types may not be updated
+              // @ts-expect-error - sharedTransitionTag is supported in Reanimated v4 but types may not be updated
               sharedTransitionTag={`image-${entry.id}`}
             />
           </View>

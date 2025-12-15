@@ -172,7 +172,7 @@ export function CalendarView({ onEntryPress }: CalendarViewProps) {
   return (
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
       <View className="px-4 py-4 gap-[9px]">
-        {months.map((month, monthIndex) => {
+        {months.map((month) => {
           const year = month.getFullYear();
           const monthNum = month.getMonth();
           const calendarDays = generateCalendarDays(year, monthNum, entriesByDate, currentDate);

@@ -1,14 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { Entry } from '@db/types';
 import { getEntries, searchEntries, updateEntry } from '@db/queries';
 import { useTheme } from '@hooks/useTheme';
-import { ButtonIcon } from '@components/ButtonIcon';
 import { TimelineEntryCard } from '@components/TimelineEntryCard';
 import { Toast } from '@components/Toast';
-import { formatDateWithOrdinal } from '@utils/dateFormat';
 import Gradient from '@components/Gradient';
 import { Icon } from '@components/Icon';
 import { ViewModeButtons } from '@components/ViewModeButtons';

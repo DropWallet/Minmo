@@ -560,7 +560,7 @@ export default function EntryImageDetailScreen() {
               source={{ uri: entry.photo_local_uri }}
               className="w-full h-full "
               style={{ resizeMode: 'cover' }}
-              // @ts-ignore - sharedTransitionTag is supported in Reanimated v4 but types may not be updated
+              // @ts-expect-error - sharedTransitionTag is supported in Reanimated v4 but types may not be updated
               sharedTransitionTag={`image-${entry.id}`}
             />
           </ShadowBox>
