@@ -6,14 +6,16 @@ import { Entry } from '@db/types';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import { ButtonIcon } from '@components/ButtonIcon';
 import { ButtonPrimary } from '@components/ButtonPrimary';
+import { HighlightedText } from '@components/HighlightedText';
 
 interface TimelineEntryCardProps {
   entry: Entry;
   onPress?: () => void;
   onBookmark?: () => void;
+  searchQuery?: string;
 }
 
-export function TimelineEntryCard({ entry, onPress, onBookmark }: TimelineEntryCardProps) {
+export function TimelineEntryCard({ entry, onPress, onBookmark, searchQuery }: TimelineEntryCardProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
@@ -143,20 +145,24 @@ export function TimelineEntryCard({ entry, onPress, onBookmark }: TimelineEntryC
 
           {/* Prompt */}
           {entry.prompt && (
-            <Text className="font-sans-semibold text-lg text-text-brand dark:text-text-brand-dark">
-              {entry.prompt}
-            </Text>
+            <HighlightedText
+              text={entry.prompt}
+              searchQuery={searchQuery}
+              className="font-sans-semibold text-lg text-text-brand dark:text-text-brand-dark"
+              highlightClassName="font-sans-bold"
+            />
           )}
 
           {/* Transcript Preview */}
           {entry.transcript && (
-            <Text 
+            <HighlightedText
+              text={entry.transcript}
+              searchQuery={searchQuery}
               className="text-2xl font-serif-medium text-text-primary dark:text-text-primary-dark mb-2"
+              highlightClassName="font-serif-bold"
               numberOfLines={3}
               ellipsizeMode="tail"
-            >
-              {entry.transcript}
-            </Text>
+            />
           )}
 
           {/* Date and Duration Row - Below Transcript */}

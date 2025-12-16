@@ -194,6 +194,7 @@ export default function TimelineScreen() {
         onPlay={() => playEntry(item)}
         isPlaying={isPlaying}
         onBookmark={() => handleBookmark(item)}
+        searchQuery={isSearching && searchQuery.trim().length >= 2 ? searchQuery : undefined}
       />
     );
   };
@@ -229,6 +230,7 @@ export default function TimelineScreen() {
           entry={item}
           onPress={() => handleEntryPress(item.id)}
           onBookmark={() => handleBookmark(item)}
+          searchQuery={isSearching && searchQuery.trim().length >= 2 ? searchQuery : undefined}
         />
       )}
       keyExtractor={(item) => item.id}

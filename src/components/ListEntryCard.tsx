@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Entry } from '@db/types';
 import { formatDateWithOrdinal } from '@utils/dateFormat';
 import { ButtonIcon } from '@components/ButtonIcon';
+import { HighlightedText } from '@components/HighlightedText';
 
 interface ListEntryCardProps {
   entry: Entry;
@@ -10,9 +11,10 @@ interface ListEntryCardProps {
   onPlay: () => void;
   isPlaying: boolean;
   onBookmark?: () => void;
+  searchQuery?: string;
 }
 
-export function ListEntryCard({ entry, onPress, onPlay, isPlaying, onBookmark }: ListEntryCardProps) {
+export function ListEntryCard({ entry, onPress, onPlay, isPlaying, onBookmark, searchQuery }: ListEntryCardProps) {
   const entryDate = new Date(entry.created_at);
   const formattedDate = formatDateWithOrdinal(entryDate);
   const durationText = entry.duration_seconds ? `${Math.round(entry.duration_seconds)}s` : '';
@@ -38,21 +40,23 @@ export function ListEntryCard({ entry, onPress, onPlay, isPlaying, onBookmark }:
 
           {/* Prompt and Transcript */}
           <View className="flex-col gap-0.5 self-stretch">
-            <Text 
+            <HighlightedText
+              text={entry.prompt || 'Untitled Moment'}
+              searchQuery={searchQuery}
               className="text-base font-sans-semibold text-text-brand dark:text-text-brand-dark"
+              highlightClassName="font-sans-bold"
               numberOfLines={1}
               ellipsizeMode="tail"
-            >
-              {entry.prompt || 'Untitled Moment'}
-            </Text>
+            />
             {entry.transcript && (
-              <Text 
+              <HighlightedText
+                text={entry.transcript}
+                searchQuery={searchQuery}
                 className="text-xl font-serif-medium text-text-primary dark:text-text-secondary-dark"
+                highlightClassName="font-serif-bold"
                 numberOfLines={2}
                 ellipsizeMode="tail"
-              >
-                {entry.transcript}
-              </Text>
+              />
             )}
           </View>
 
