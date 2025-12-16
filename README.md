@@ -8,12 +8,16 @@ A minimal, offline-first micro-diary for parents: one voice note per day, option
 - Offline-first, privacy-first: local by default; optional cloud + transcription.
 - Production-ready: tests, lint, CI.
 
-## V1 Scope (Milestone 1: Local MVP)
+## V1 Scope (Milestone 1: Local MVP) ✅ **COMPLETE**
 - Bottom tabs: Timeline | Record | Settings.
 - Record → Stop → Review → Save locally (audio + metadata) → optionally add photo (camera or library).
-- Timeline list (reverse chronological).
+- Timeline with multiple view modes:
+  - **List view:** Reverse chronological list with entry details
+  - **Grid view (Calendar):** Monthly calendar with visual indicators on days with entries
+  - **Card view:** Gallery-style cards with photos and previews
 - Entry Detail: playback, prompt, transcript field (manual), favourite.
-- Search: local SQLite FTS5 on prompt/transcript.
+- Saved screen: Favourites view with list and card modes.
+- Search: local SQLite FTS5 on prompt/transcript (with LIKE fallback).
 - Transcription default ON with clear privacy note and a Settings toggle.
 - Docs, lint, tests, CI.
 
